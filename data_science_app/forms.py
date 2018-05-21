@@ -29,4 +29,4 @@ class New_Analise_Form(forms.ModelForm):
 class Edit_Analise_Form(forms.ModelForm):
     class Meta:
         model = Analise
-        fields = ('Name','WS','WD','WD_Step','WD_Start','WD_Stop','WS_Start','WS_Stop','Date_Modified')
+        fields = ('Name','WS','WD','WD_Step','WD_Start','WD_Stop','WS_Start','WS_Stop','Date_Modified','File_Data')

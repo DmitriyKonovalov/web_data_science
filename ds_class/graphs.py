@@ -1,5 +1,6 @@
 import math
-
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas
@@ -19,6 +20,7 @@ class Graphs:
         plt.scatter(self.avg[wd], self.avg[ws], marker='^', label=ws + '_Awg')
         plt.legend()
         plt.savefig(filename)
+        plt.close()
 
     def wind_rose(self, ws, step, filename):
         df = self.df
@@ -33,6 +35,7 @@ class Graphs:
         ax = fig.add_subplot(111, projection='polar')
         ax.plot(angle, count, linewidth=2, label="Wind direction")
         plt.savefig(filename)
+        plt.close(fig)
 
     def hist(self, ws, filename):
         plt.figure(figsize=(20, 10), dpi=80)
@@ -41,6 +44,7 @@ class Graphs:
         plt.grid(True)
         plt.hist(self.df[ws], label=ws)
         plt.savefig(filename)
+        plt.close()
 
     def time(self, ad, filename):
         plt.figure(figsize=(20, 10), dpi=80)
@@ -50,3 +54,4 @@ class Graphs:
         y = self.df[ad]
         plt.plot(x, y)
         plt.savefig(filename)
+        plt.close()

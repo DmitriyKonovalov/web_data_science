@@ -103,9 +103,9 @@ def _analize(request,analise_id):
     pd.DataFrame.to_csv(df_group.df_grouped, os.path.join(output_dir, group_file))
 
     graph = Graphs(df.df_filtered, df_group.df_grouped)
-    graph.wind_rose(analise.WD, analise.WD_Step, os.path.join(output_dir, 'wd_rose.png'))
-    graph.hist(analise.WS, os.path.join(output_dir, 'hist.png'))
-    graph.time("AD_1", os.path.join(output_dir, 'time.png'))
-    graph.ws_wd(analise.WD, analise.WS, os.path.join(output_dir, 'ws_wd.png'))
+    graph.wind_rose(analise.WD, analise.WD_Step, os.path.join(output_dir, '{}_wd_rose.png'.format(analise.Name)))
+    graph.hist(analise.WS, os.path.join(output_dir, '{}_hist.png'.format(analise.Name)))
+    graph.time("AD_1", os.path.join(output_dir, '{}_time.png'.format(analise.Name)))
+    graph.ws_wd(analise.WD, analise.WS, os.path.join(output_dir, '{}_ws_wd.png'.format(analise.Name)))
 
     return render(request, 'analize.html', {})

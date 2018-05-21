@@ -4,11 +4,19 @@
 <div class="text-center">
     <br/>
     <br/>
-    <h4>Приветсвую, <a href="{% url 'user' %}">{{ request.user.get_full_name }}</a></h4>
+    <h4>Приветсвую, <a href="{% url 'user' %}">
+        {% if request.user.get_full_name != "" %}
+        {{ request.user.get_full_name }}
+        {% else %}
+        {{ request.user }}
+        {% endif %}
+    </a></h4>
 </div>
 
 {% url 'home' as home_url %}
 {% url 'desktop' as desktop_url %}
+
+
 <div class="list-group">
     <span class="text-uppercase">Панель навигации</span>
     <a href="{% url 'home' %}"
