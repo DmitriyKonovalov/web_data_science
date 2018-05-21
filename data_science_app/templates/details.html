@@ -1,0 +1,32 @@
+{% extends 'main.html' %}
+{% block title %} Рабочий стол {% endblock %}
+{% block page %}
+<div class="panel">
+    <div class="panel-heading bg-ruby">
+        <h4 class="panel-title text-center text-white">
+            Анализ {{ analise.Name }}
+        </h4>
+    </div>
+    <div class="panel-body">
+        <div class="text-right">
+            <a href="{% url 'edit_analise' analise.id %}" class="btn btn-red">Изменить</a>
+            <a href="{% url 'analize' analise.id %}" class="btn btn-red">Выполнить расчеты</a>
+            <br/>
+        </div>
+        <p>{{ analise.id }}</p>
+        <p>{{ analise.Name }}</p>
+        <p>{{ analise.user }}</p>
+        <p>{{ analise.WS }}</p>
+        <p>{{ analise.WD }}</p>
+        <p>{{ analise.WD_Step }}</p>
+        <p>{{ analise.WD_Start }}</p>
+        <p>{{ analise.WD_Stop }}</p>
+        <p>{{ analise.WS_Start }}</p>
+        <p>{{ analise.WS_Stop }}</p>
+        <p>{{ analise.Date_Create }}</p>
+        <p>{{ analise.Date_Modified }}</p>
+        <p>{{ analise.File_Data }}</p>
+
+    </div>
+</div>
+{% endblock %}

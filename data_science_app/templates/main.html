@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block sidebar %}
+
+<div class="text-center">
+    <br/>
+    <br/>
+    <h4>Приветсвую, <a href="{% url 'user' %}">{{ request.user.get_full_name }}</a></h4>
+</div>
+
+{% url 'home' as home_url %}
+{% url 'desktop' as desktop_url %}
+<div class="list-group">
+    <span class="text-uppercase">Панель навигации</span>
+    <a href="{% url 'home' %}"
+       class="list-group-item {% if request.path == home_url %} active {% endif %}"> Главная </a>
+    <a href="{% url 'desktop' %}"
+       class="list-group-item {% if request.path == desktop_url %} active {% endif %}"> Просмотр анализов </a>
+    <div class="text-center">
+        <a href="{% url 'sign_out' %}?next={{ request.path }}" class="btn btn-red">Выход</a>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,58 @@
+{% extends 'main.html' %}
+{% block title %} Рабочий стол {% endblock %}
+{% block page %}
+<div class="panel">
+    <div class="panel-heading bg-ruby">
+        <h4 class="panel-title text-center text-white">
+            Анализы
+        </h4>
+    </div>
+    <div class="panel-body">
+        <div class="text-right">
+            <a href="{% url 'new_analise' %}" class="btn btn-red">Добавить анализ</a>
+            <br/>
+            <br/>
+        </div>
+    </div>
+    <table class="table table-bordered table-hover table-striped">
+        <thead>
+        <tr class="bg-red text-white">
+            <th>ID</th>
+            <th>Название</th>
+            <th>WS</th>
+            <th>WD</th>
+            <th>WD_Step</th>
+            <th>WD_Start</th>
+            <th>WD_Stop</th>
+            <th>WS_Start</th>
+            <th>WS_Stop</th>
+            <th>Дата создания</th>
+            <th>Дата изменения</th>
+            <th>Файл</th>
+            <th>Пользователь</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for analise in analises %}
+        {% if analise.user == user %}
+        <tr>
+            <td scope="row">{{ analise.id }}</td>
+            <td><a href="{% url 'details' analise.id %}">{{ analise.Name }}</a></td>
+            <td>{{ analise.WS }}</td>
+            <td>{{ analise.WD }}</td>
+            <td>{{ analise.WD_Step }}</td>
+            <td>{{ analise.WD_Start }}</td>
+            <td>{{ analise.WD_Stop }}</td>
+            <td>{{ analise.WS_Start }}</td>
+            <td>{{ analise.WS_Stop }}</td>
+            <td>{{ analise.Date_Create }}</td>
+            <td>{{ analise.Date_Modified }}</td>
+            <td>{{ analise.File_Data }}</td>
+            <td>{{ analise.user }}</td>
+        </tr>
+        {% endif %}
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

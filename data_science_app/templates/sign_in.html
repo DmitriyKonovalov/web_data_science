@@ -1,0 +1,12 @@
+{% extends 'base_sign.html' %}
+{% load bootstrap3 %}
+{% block title %} Вход {% endblock %}
+{% block heading %}Страница входа!{% endblock %}
+{% block page %}
+    <form method="POST">
+        {% csrf_token %}
+        {% bootstrap_form form %}
+        <button type="submit">Войти</button>
+    </form>
+<a href="{% url 'sign_up' %}">Регистрация</a>
+{% endblock %}
