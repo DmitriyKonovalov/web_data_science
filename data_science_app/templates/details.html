@@ -1,32 +1,75 @@
 {% extends 'main.html' %}
 {% block title %} Рабочий стол {% endblock %}
 {% block page %}
-<div class="panel">
-    <div class="panel-heading bg-ruby">
-        <h4 class="panel-title text-center text-white">
-            Анализ {{ analise.Name }}
-        </h4>
-    </div>
-    <div class="panel-body">
-        <div class="text-right">
-            <a href="{% url 'edit_analise' analise.id %}" class="btn btn-red">Изменить</a>
-            <a href="{% url 'analize' analise.id %}" class="btn btn-red">Выполнить расчеты</a>
-            <br/>
-        </div>
-        <p>{{ analise.id }}</p>
-        <p>{{ analise.Name }}</p>
-        <p>{{ analise.user }}</p>
-        <p>{{ analise.WS }}</p>
-        <p>{{ analise.WD }}</p>
-        <p>{{ analise.WD_Step }}</p>
-        <p>{{ analise.WD_Start }}</p>
-        <p>{{ analise.WD_Stop }}</p>
-        <p>{{ analise.WS_Start }}</p>
-        <p>{{ analise.WS_Stop }}</p>
-        <p>{{ analise.Date_Create }}</p>
-        <p>{{ analise.Date_Modified }}</p>
-        <p>{{ analise.File_Data }}</p>
 
+
+<div class="container">
+    <br/>
+    <div class="d-flex justify-content-between">
+        <div>
+            <a href="{% url 'edit_analise' analise.id %}" class="btn btn-outline-success">Изменить</a>
+            <a href="{% url 'delete_analise' analise.id %}" class="btn btn-outline-danger">Удалить</a>
+        </div>
+        <a href="{% url 'desktop' %}" class="btn btn-outline-success">Рабочий стол</a>
+        <a href="{% url 'analize' analise.id %}" class="btn btn-outline-success">Выполнить расчеты</a>
     </div>
+    <h4 class="d-flex justify-content-center"> Анализ {{ analise.Name }} </h4>
+    <br/>
+    <table class="table table-inverse table-hover">
+        <tbody>
+        <tr>
+            <th>ID:</th>
+            <th>{{ analise.id }}</th>
+        </tr>
+        <tr>
+            <th>Имя:</th>
+            <th>{{ analise.Name }}</th>
+        </tr>
+        <tr>
+            <th>Автор:</th>
+            <th>{{ analise.user }}</th>
+        </tr>
+        <tr>
+            <th>WS:</th>
+            <th>{{ analise.WS }}</th>
+        </tr>
+        <tr>
+            <th>WD:</th>
+            <th>{{ analise.WD }}</th>
+        </tr>
+        <tr>
+            <th>WD_Step:</th>
+            <th>{{ analise.WD_Step }}</th>
+        </tr>
+        <tr>
+            <th>WD_Start:</th>
+            <th>{{ analise.WD_Start }}</th>
+        </tr>
+        <tr>
+            <th>WD_Stop:</th>
+            <th>{{ analise.WD_Stop }}</th>
+        </tr>
+        <tr>
+            <th>WS_Start:</th>
+            <th>{{ analise.WS_Start }}</th>
+        </tr>
+        <tr>
+            <th>WS_Stop:</th>
+            <th>{{ analise.WS_Stop }}</th>
+        </tr>
+        <tr>
+            <th>Дата создания:</th>
+            <th>{{ analise.Date_Create }}</th>
+        </tr>
+        <tr>
+            <th>Дата модификации:</th>
+            <th>{{ analise.Date_Modified }}</th>
+        </tr>
+        <tr>
+            <th>Файл:</th>
+            <th>{{ analise.File_Data }}</th>
+        </tr>
+        </tbody>
+    </table>
 </div>
 {% endblock %}

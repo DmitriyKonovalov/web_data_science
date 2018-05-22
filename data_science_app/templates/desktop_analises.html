@@ -1,24 +1,16 @@
 {% extends 'main.html' %}
 {% block title %} Рабочий стол {% endblock %}
 {% block page %}
-<div class="panel">
-    <div class="panel-heading bg-ruby">
-        <h4 class="panel-title text-center text-white">
-            Анализы
-        </h4>
-    </div>
-    <div class="panel-body">
-        <div class="text-right">
-            <a href="{% url 'new_analise' %}" class="btn btn-red">Добавить анализ</a>
-            <br/>
-            <br/>
-        </div>
-    </div>
-    <table class="table table-bordered table-hover table-striped">
+<div class="container">
+    <br/>
+    <div class="d-flex justify-content-end">
+        <a href="{% url 'new_analise' %}" class="btn btn-outline-success">Добавить анализ</a></div>
+    <br/>
+    <table class="table table-inverse table-hover">
         <thead>
-        <tr class="bg-red text-white">
-            <th>ID</th>
-            <th>Название</th>
+        <tr>
+            <th >ID</th>
+            <th data-field="name" data-sortable="true">Название</th>
             <th>WS</th>
             <th>WD</th>
             <th>WD_Step</th>
@@ -28,16 +20,14 @@
             <th>WS_Stop</th>
             <th>Дата создания</th>
             <th>Дата изменения</th>
-            <th>Файл</th>
-            <th>Пользователь</th>
         </tr>
         </thead>
         <tbody>
         {% for analise in analises %}
         {% if analise.user == user %}
         <tr>
-            <td scope="row">{{ analise.id }}</td>
-            <td><a href="{% url 'details' analise.id %}">{{ analise.Name }}</a></td>
+            <td>{{ analise.id }}</td>
+            <td><a href="{% url 'details' analise.id %}" class="btn btn-outline-success">{{ analise.Name }}</a></td>
             <td>{{ analise.WS }}</td>
             <td>{{ analise.WD }}</td>
             <td>{{ analise.WD_Step }}</td>
@@ -47,12 +37,13 @@
             <td>{{ analise.WS_Stop }}</td>
             <td>{{ analise.Date_Create }}</td>
             <td>{{ analise.Date_Modified }}</td>
-            <td>{{ analise.File_Data }}</td>
-            <td>{{ analise.user }}</td>
         </tr>
         {% endif %}
         {% endfor %}
         </tbody>
     </table>
+    <br/>
+{{count11}}
 </div>
+
 {% endblock %}

@@ -3,12 +3,13 @@
 {% block title %} Вход {% endblock %}
 {% block heading %}Страница входа!{% endblock %}
 {% block page %}
-      <form class="form-signin" role="form" method="POST">
-          {% csrf_token %}
-        {% bootstrap_form form %}
-        <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
-      </form>
+
+<form class="form-signin" role="form" method="POST">
+    {% csrf_token %}
+    {% bootstrap_form form %}
+    <button class="btn btn-primary btn-block" type="submit">Sign in</button>
     <a href="{% url 'sign_up' %}">Регистрация</a>
+</form>
 {% endblock %}
 
 

@@ -1,6 +1,7 @@
+from django.contrib.auth.models import User
 from django.db import models
 from django.utils.timezone import now
-from django.contrib.auth.models import User
+
 
 class Analise(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -22,6 +23,13 @@ class Analise(models.Model):
     class Meta:
         verbose_name = "Анализ"
         ordering = ["Date_Modified"]
+
+    def delete(self, using=None, keep_parents=False):
+        try:
+            self.File_Data.delete()
+        except Exception:
+            pass
+        super(Analise, self).delete(using, keep_parents)
 
 
 class Output(models.Model):
