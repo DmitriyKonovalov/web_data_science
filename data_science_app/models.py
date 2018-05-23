@@ -5,7 +5,7 @@ from django.utils.timezone import now
 
 class Analise(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    Name = models.CharField(max_length=20, verbose_name="Имя анализа", unique=True)
+    name = models.CharField(max_length=20, verbose_name="Имя анализа", unique=True)
     WS = models.CharField(max_length=20, verbose_name='Сигнал скорости ветра')
     WD = models.CharField(max_length=20, verbose_name='Сигнал направления ветра')
     WD_Step = models.FloatField(default=0, verbose_name="Шаг группировки направления")
@@ -18,7 +18,7 @@ class Analise(models.Model):
     File_Data = models.FileField(upload_to="upload_data")
 
     def __str__(self):
-        return self.Name
+        return self.name
 
     class Meta:
         verbose_name = "Анализ"

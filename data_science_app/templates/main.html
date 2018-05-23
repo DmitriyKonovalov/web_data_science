@@ -46,9 +46,9 @@
                 <div class="dropdown-header">
                     {{ request.user}}
                 </div>
-                <a class="dropdown-item" href="user">Изменить данные</a>
+                <a class="dropdown-item" href="{% url 'user' %}">Изменить данные</a>
                 <div class="dropdown-divider"></div>
-                <a class="dropdown-item" href="sign_out">Выход</a>
+                <a class="dropdown-item" href="{% url 'sign_out' %}">Выход</a>
             </div>
         </div>
     </div>

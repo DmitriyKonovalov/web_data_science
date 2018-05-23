@@ -27,7 +27,7 @@
         {% if analise.user == user %}
         <tr>
             <td>{{ analise.id }}</td>
-            <td><a href="{% url 'details' analise.id %}" class="btn btn-outline-success">{{ analise.Name }}</a></td>
+            <td><a href="{% url 'details' analise.id %}" class="btn btn-outline-success">{{ analise.name }}</a></td>
             <td>{{ analise.WS }}</td>
             <td>{{ analise.WD }}</td>
             <td>{{ analise.WD_Step }}</td>

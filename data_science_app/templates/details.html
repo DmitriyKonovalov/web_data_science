@@ -13,7 +13,7 @@
         <a href="{% url 'desktop' %}" class="btn btn-outline-success">Рабочий стол</a>
         <a href="{% url 'analize' analise.id %}" class="btn btn-outline-success">Выполнить расчеты</a>
     </div>
-    <h4 class="d-flex justify-content-center"> Анализ {{ analise.Name }} </h4>
+    <h4 class="d-flex justify-content-center"> Анализ {{ analise.name }} </h4>
     <br/>
     <table class="table table-inverse table-hover">
         <tbody>
@@ -23,7 +23,7 @@
         </tr>
         <tr>
             <th>Имя:</th>
-            <th>{{ analise.Name }}</th>
+            <th>{{ analise.name }}</th>
         </tr>
         <tr>
             <th>Автор:</th>
