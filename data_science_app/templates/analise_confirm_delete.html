@@ -1,0 +1,16 @@
+{% extends 'main.html' %}
+{% block title %} Удаление {% endblock %}
+{% block page %}
+<div class="container">
+    <br/>
+    <div class="d-flex justify-content-center">
+    <form method="post">
+    {% csrf_token %}
+    <p>Вы точно хотите удалить "{{ object }}"?</p>
+    <input class="btn btn-outline-danger" type="submit" value="Да, точно" />
+    <a href="{% url 'details' analise.id %}" class="btn btn-outline-success">Отмена</a>
+</form>
+    </div>
+</div>
+
+{% endblock %}

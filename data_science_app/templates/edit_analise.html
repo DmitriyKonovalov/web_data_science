@@ -3,21 +3,18 @@
 {% block title %} Анализ {% endblock %}
 
 {% block page %}
-<div class="col-lg-offset-2 col-lg-8">
-    <div class="panel">
-        <div class="panel-heading bg-ruby">
-            <h4 class="panel-title text-center text-white">
-                Анализ
-            </h4>
-        </div>
-        <div class="panel-body">
-            <form method="POST" enctype="multipart/form-data">
-                {% csrf_token %}
-                {% bootstrap_form form %}
-                <button type="submit" class="btn btn-red">Обновить</button>
-            </form>
-            <div><a href="{% url 'analize' analise_id %}"> Вычислить </a></div>
-        </div>
+<div class="container">
+    <br/>
+    <div class="d-flex justify-content-center">
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            {% bootstrap_form form %}
+            <div class="d-flex justify-content-between">
+                <button type="submit" class="btn btn-outline-success">Обновить</button>
+                <a href="{% url 'details' analise.id %}" class="btn btn-outline-danger">Отмена</a>
+            </div>
+        </form>
     </div>
 </div>
+<br/>
 {% endblock %}

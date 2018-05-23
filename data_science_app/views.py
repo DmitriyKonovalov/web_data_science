@@ -4,10 +4,12 @@ import pandas as pd
 from django.conf import settings
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
+from django.contrib.auth.forms import UserCreationForm
 from django.shortcuts import render, redirect
-from django.views import View
-from data_science_app.forms import NewAnaliseForm, UserForm, UserFormEdit, EditAnaliseForm
+from django.urls import reverse_lazy
+from django.views import View, generic
+
+from data_science_app.forms import NewAnaliseForm, UserFormEdit, EditAnaliseForm
 from data_science_app.models import Analise
 from ds_class.calculate import Calculate
 from ds_class.df_filter import DfFilter
@@ -22,19 +24,28 @@ def home(request):
     return render(request, 'home.html', {})
 
 
-@login_required(login_url=DEFAULT_LOGIN_URL)
-def user_edit(request):
-    user_form = UserFormEdit(instance=request.user)
-    if request.method == 'POST':
-        user_form = UserFormEdit(request.POST, instance=request.user)
+class SignUp(View):
+    template_name = "sign_up.html"
+
+    def get(self, request):
+        user_form = UserCreationForm()
+        return render(request, self.template_name, {'user_form': user_form})
+
+    def post(self, request):
+        user_form = UserCreationForm(request.POST)
         if user_form.is_valid():
             user_form.save()
-            return redirect(home)
-    return render(request, 'user.html', {'user_form': user_form})
+            username = user_form.cleaned_data.get('username')
+            my_password = user_form.cleaned_data.get('password1')
+            user = authenticate(username=username, password=my_password)
+            login(request, user)
+            return redirect(reverse_lazy("user"))
+        return redirect(reverse_lazy("sign_up"))
 
 
 class UserEdit(View):
     template_name = "user.html"
+
     def get(self, request):
         user_form = UserFormEdit(instance=request.user)
         return render(request, self.template_name, {'user_form': user_form})
@@ -44,65 +55,49 @@ class UserEdit(View):
         if user_form.is_valid():
             user_form.save()
             return redirect(home)
+        return redirect(reverse_lazy("user"))
 
 
-def sign_up(request):
-    user_form = UserForm()
-    if request.method == "POST":
-        user_form = UserForm(request.POST)
-    if user_form.is_valid():
-        new_user = User.objects.create_user(**user_form.cleaned_data)
-        user = authenticate(
-            username=user_form.cleaned_data['username'],
-            password=user_form.cleaned_data['password']
-        )
-        login(request, user)
-        return redirect(home)
-    return render(request, 'sign_up.html', {'user_form': user_form})
+class Desktop(generic.ListView):
+    template_name = "desktop_analises.html"
+    model = Analise
+    context_object_name = "analises"
+
+    def get_queryset(self):
+        return Analise.objects.all()
 
 
-@login_required(login_url=DEFAULT_LOGIN_URL)
-def desktop(request):
-    analises = Analise.objects.all()
-    return render(request, 'desktop_analises.html', {'analises': analises, 'user': request.user})
+class Details(generic.ListView):
+    template_name = "details.html"
+    model = Analise
+    context_object_name = "analise"
+
+    def get_queryset(self):
+        return Analise.objects.get(id=self.kwargs['pk'])
 
 
-@login_required(login_url=DEFAULT_LOGIN_URL)
-def view_new_analise(request):
-    form = NewAnaliseForm()
-    if request.method == 'POST':
-        form = NewAnaliseForm(request.POST or None, files=request.FILES)
-        if form.is_valid():
-            obj = form.save(commit=False)
-            obj.save()
-            return redirect(desktop)
-        #else:
-        #показать ошибки на форме
-    return render(request, 'new_analise.html', {'form': form})
+class NewAnalysis(generic.CreateView):
+    template_name = "new_analise.html"
+    model = Analise
+    form_class = NewAnaliseForm
+
+    def form_valid(self, form):
+        obj = form.save(commit=False)
+        obj.save()
+        return redirect(reverse_lazy('desktop'))
 
 
-@login_required(login_url=DEFAULT_LOGIN_URL)
-def view_detail(request, analise_id):
-    analise = Analise.objects.get(id=analise_id)
-    return render(request, 'details.html', {'analise': analise, 'user': request.user})
+class EditAnalysis(generic.UpdateView):
+    template_name = "edit_analise.html"
+    model = Analise
+    form_class = EditAnaliseForm
+    success_url = reverse_lazy('desktop')
 
 
-
-@login_required(login_url=DEFAULT_LOGIN_URL)
-def edit_analise(request, analise_id):
-    analise_form = EditAnaliseForm(instance=Analise.objects.get(id=analise_id))
-    if request.method == 'POST':
-        analise_form = EditAnaliseForm(request.POST, request.FILES, instance=Analise.objects.get(id=analise_id))
-        if analise_form.is_valid():
-            analise_form.save()
-            return redirect(desktop)
-    return render(request, 'edit_analise.html', {'form': analise_form, 'analise_id': analise_id})
-
-
-@login_required(login_url=DEFAULT_LOGIN_URL)
-def delete_analise(request, analise_id):
-    Analise.delete(Analise.objects.get(id=analise_id))
-    return redirect(desktop)
+class DeleteAnalysis(generic.DeleteView):
+    template_name = "analise_confirm_delete.html"
+    model = Analise
+    success_url = reverse_lazy('desktop')
 
 
 @login_required(login_url=DEFAULT_LOGIN_URL)
