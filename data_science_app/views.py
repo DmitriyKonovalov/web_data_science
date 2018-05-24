@@ -7,8 +7,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
+from django.utils.timezone import now
 from django.views import View, generic
-from django.contrib.auth.models import User
 from data_science_app.forms import NewAnaliseForm, UserFormEdit, EditAnaliseForm
 from data_science_app.models import Analise
 from ds_class.calculate import Calculate
@@ -83,6 +83,8 @@ class NewAnalysis(generic.CreateView):
     def form_valid(self, form):
         obj = form.save(commit=False)
         obj.user = self.request.user
+        obj.Date_Create = now()
+        obj.Date_Modified = now()
         obj.save()
         return redirect(reverse_lazy('desktop'))
 
@@ -93,6 +95,11 @@ class EditAnalysis(generic.UpdateView):
     form_class = EditAnaliseForm
     success_url = reverse_lazy('desktop')
 
+    def form_valid(self, form):
+        obj = form.save(commit=False)
+        obj.Date_Modified = now()
+        obj.save()
+        return redirect(self.success_url)
 
 class DeleteAnalysis(generic.DeleteView):
     template_name = "analise_confirm_delete.html"

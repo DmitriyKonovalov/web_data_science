@@ -25,12 +25,10 @@ class NewAnaliseForm(forms.ModelForm):
     #    user = forms.ModelChoiceField(queryset=Analise.objects.all(), widget=forms.HiddenInput)
     class Meta:
         model = Analise
-        fields = ('name', 'WS', 'WD', 'WD_Step', 'WD_Start', 'WD_Stop', 'WS_Start', 'WS_Stop', 'Date_Create',
-                  'Date_Modified', 'File_Data')
+        fields = ('name', 'WS', 'WD', 'WD_Step', 'WD_Start', 'WD_Stop', 'WS_Start', 'WS_Stop', 'File_Data')
 
 
 class EditAnaliseForm(forms.ModelForm):
     class Meta:
         model = Analise
-        fields = (
-        'name', 'WS', 'WD', 'WD_Step', 'WD_Start', 'WD_Stop', 'WS_Start', 'WS_Stop', 'Date_Modified', 'File_Data')
+        fields = ('name', 'WS', 'WD', 'WD_Step', 'WD_Start', 'WD_Stop', 'WS_Start', 'WS_Stop', 'File_Data')
