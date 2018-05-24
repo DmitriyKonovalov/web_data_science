@@ -19,16 +19,3 @@ class UserFormEdit(forms.ModelForm):
     class Meta:
         model = User
         fields = ('first_name', 'last_name', 'email')
-
-
-class NewAnaliseForm(forms.ModelForm):
-    #    user = forms.ModelChoiceField(queryset=Analise.objects.all(), widget=forms.HiddenInput)
-    class Meta:
-        model = Analise
-        fields = ('name', 'WS', 'WD', 'WD_Step', 'WD_Start', 'WD_Stop', 'WS_Start', 'WS_Stop', 'File_Data')
-
-
-class EditAnaliseForm(forms.ModelForm):
-    class Meta:
-        model = Analise
-        fields = ('name', 'WS', 'WD', 'WD_Step', 'WD_Start', 'WD_Stop', 'WS_Start', 'WS_Stop', 'File_Data')

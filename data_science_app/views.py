@@ -9,7 +9,7 @@ from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.utils.timezone import now
 from django.views import View, generic
-from data_science_app.forms import NewAnaliseForm, UserFormEdit, EditAnaliseForm
+from data_science_app.forms import UserFormEdit
 from data_science_app.models import Analise
 from ds_class.calculate import Calculate
 from ds_class.df_filter import DfFilter
@@ -78,7 +78,8 @@ class Details(generic.ListView):
 
 class NewAnalysis(generic.CreateView):
     template_name = "new_analise.html"
-    form_class = NewAnaliseForm
+    model = Analise
+    fields = ('name', 'WS', 'WD', 'WD_Step', 'WD_Start', 'WD_Stop', 'WS_Start', 'WS_Stop', 'File_Data')
 
     def form_valid(self, form):
         obj = form.save(commit=False)
@@ -92,7 +93,7 @@ class NewAnalysis(generic.CreateView):
 class EditAnalysis(generic.UpdateView):
     template_name = "edit_analise.html"
     model = Analise
-    form_class = EditAnaliseForm
+    fields = ('name', 'WS', 'WD', 'WD_Step', 'WD_Start', 'WD_Stop', 'WS_Start', 'WS_Stop', 'File_Data')
     success_url = reverse_lazy('desktop')
 
     def form_valid(self, form):
@@ -104,6 +105,7 @@ class EditAnalysis(generic.UpdateView):
 class DeleteAnalysis(generic.DeleteView):
     template_name = "analise_confirm_delete.html"
     model = Analise
+    fields = ('name', 'WS', 'WD', 'WD_Step', 'WD_Start', 'WD_Stop', 'WS_Start', 'WS_Stop', 'File_Data')
     success_url = reverse_lazy('desktop')
 
 
