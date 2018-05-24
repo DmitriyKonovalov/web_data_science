@@ -35,5 +35,5 @@ urlpatterns = [
                   path('desktop/<int:pk>/edit_analise', login_required(views.EditAnalysis.as_view()),
                        name='edit_analise'),
                   path('desktop/<int:pk>/delete', login_required(views.DeleteAnalysis.as_view()), name='delete_analise'),
-                  path('desktop/<int:analise_id>/analize', views._analize, name='analize'),
+                  path('desktop/<int:pk>/analize', login_required(views.DoAnalysis.as_view()), name='analize'),
               ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

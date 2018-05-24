@@ -8,7 +8,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.views import View, generic
-
+from django.contrib.auth.models import User
 from data_science_app.forms import NewAnaliseForm, UserFormEdit, EditAnaliseForm
 from data_science_app.models import Analise
 from ds_class.calculate import Calculate
@@ -78,11 +78,11 @@ class Details(generic.ListView):
 
 class NewAnalysis(generic.CreateView):
     template_name = "new_analise.html"
-    model = Analise
     form_class = NewAnaliseForm
 
     def form_valid(self, form):
         obj = form.save(commit=False)
+        obj.user = self.request.user
         obj.save()
         return redirect(reverse_lazy('desktop'))
 
@@ -100,34 +100,36 @@ class DeleteAnalysis(generic.DeleteView):
     success_url = reverse_lazy('desktop')
 
 
-@login_required(login_url=DEFAULT_LOGIN_URL)
-def _analize(request, analise_id):
-    analise = Analise.objects.get(id=analise_id)
+class DoAnalysis(generic.View):
+    template_name = "Analize.html"
+    model = Analise
+    context_object_name = "analise"
 
-    df = DfFilter(pd.read_csv(analise.File_Data.path, sep=';', index_col="Timestamp"))
+    def get(self, request, *args, **kwargs):
+        analise = Analise.objects.get(id=kwargs['pk'])
 
-    df.first_filter()
-    df.general_filter(analise.WS, analise.WS_Start, analise.WS_Stop)
-    df.general_filter(analise.WD, analise.WD_Start, analise.WD_Stop)
-    df.df_filtered["AD_1"] = Calculate.ad(df.df_filtered)
+        df = DfFilter(pd.read_csv(analise.File_Data.path, sep=';', index_col="Timestamp"))
+        df.first_filter()
+        df.general_filter(analise.WS, analise.WS_Start, analise.WS_Stop)
+        df.general_filter(analise.WD, analise.WD_Start, analise.WD_Stop)
+        df.df_filtered["AD_1"] = Calculate.ad(df.df_filtered)
 
-    output_dir = os.path.join(settings.MEDIA_ROOT, analise.name)
-    if not os.path.exists(output_dir):
-        os.mkdir(output_dir)
+        output_dir = os.path.join(settings.MEDIA_ROOT, analise.name)
+        if not os.path.exists(output_dir):
+            os.mkdir(output_dir)
 
-    filtered_file = "{}_filtered.csv".format(analise.name)
-    pd.DataFrame.to_csv(df.df_filtered, os.path.join(output_dir, filtered_file))
-    df_group = DfGroup(df.df_filtered)
-    df_group.group_df(analise.WD, analise.WD_Start, analise.WD_Stop, analise.WD_Step)
-    df_group.df_grouped = df_group.df_grouped.mean()
+        filtered_file = "{}_filtered.csv".format(analise.name)
+        pd.DataFrame.to_csv(df.df_filtered, os.path.join(output_dir, filtered_file))
+        df_group = DfGroup(df.df_filtered)
+        df_group.group_df(analise.WD, analise.WD_Start, analise.WD_Stop, analise.WD_Step)
+        df_group.df_grouped = df_group.df_grouped.mean()
 
-    group_file = "{}_group.csv".format(analise.name)
-    pd.DataFrame.to_csv(df_group.df_grouped, os.path.join(output_dir, group_file))
+        group_file = "{}_group.csv".format(analise.name)
+        pd.DataFrame.to_csv(df_group.df_grouped, os.path.join(output_dir, group_file))
 
-    graph = Graphs(df.df_filtered, df_group.df_grouped)
-    graph.wind_rose(analise.WD, analise.WD_Step, os.path.join(output_dir, '{}_wd_rose.png'.format(analise.name)))
-    graph.hist(analise.WS, os.path.join(output_dir, '{}_hist.png'.format(analise.name)))
-    graph.time("AD_1", os.path.join(output_dir, '{}_time.png'.format(analise.name)))
-    graph.ws_wd(analise.WD, analise.WS, os.path.join(output_dir, '{}_ws_wd.png'.format(analise.name)))
-
-    return render(request, 'analize.html', {})
+        graph = Graphs(df.df_filtered, df_group.df_grouped)
+        graph.wind_rose(analise.WD, analise.WD_Step, os.path.join(output_dir, '{}_wd_rose.png'.format(analise.name)))
+        graph.hist(analise.WS, os.path.join(output_dir, '{}_hist.png'.format(analise.name)))
+        graph.time("AD_1", os.path.join(output_dir, '{}_time.png'.format(analise.name)))
+        graph.ws_wd(analise.WD, analise.WS, os.path.join(output_dir, '{}_ws_wd.png'.format(analise.name)))
+        return render(request, self.template_name, {})
