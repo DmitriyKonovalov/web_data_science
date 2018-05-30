@@ -21,19 +21,27 @@ from django.contrib.auth.decorators import login_required
 from django.urls import path
 
 from data_science_app import views
-
+DEFAULT_LOGIN_URL = '/sign_in'
 urlpatterns = [
                   path('admin/', admin.site.urls),
                   path('sign_in', auth_views.login, {'template_name': 'sign_in.html'}, name='sign_in'),
                   path('sign_out', auth_views.logout, {'next_page': '/'}, name='sign_out'),
                   path('sign_up/', views.SignUp.as_view(), name='sign_up'),
-                  path('user/', login_required(views.UserEdit.as_view()), name='user'),
-                  path('', views.home, name='home'),
-                  path('desktop', login_required(views.Desktop.as_view()), name='desktop'),
-                  path('desktop/<int:pk>', login_required(views.Details.as_view()), name='details'),
-                  path('desktop/new_analise', login_required(views.NewAnalysis.as_view()), name='new_analise'),
-                  path('desktop/<int:pk>/edit_analise', login_required(views.EditAnalysis.as_view()),
+                  path('user/', login_required(views.UserEdit.as_view(), login_url=DEFAULT_LOGIN_URL), name='user'),
+                  path('search', login_required(views.SearchView.as_view(), login_url=DEFAULT_LOGIN_URL),
+                       name='search'),
+                  path('', login_required(views.Desktop.as_view(), login_url=DEFAULT_LOGIN_URL), name='desktop'),
+                  path('desktop', login_required(views.Desktop.as_view(), login_url=DEFAULT_LOGIN_URL), name='desktop'),
+                  path('desktop/<int:pk>', login_required(views.Details.as_view(), login_url=DEFAULT_LOGIN_URL),
+                       name='details'),
+                  path('desktop/new_analise', login_required(views.NewAnalysis.as_view(), login_url=DEFAULT_LOGIN_URL),
+                       name='new_analise'),
+                  path('desktop/<int:pk>/edit_analise',
+                       login_required(views.EditAnalysis.as_view(), login_url=DEFAULT_LOGIN_URL),
                        name='edit_analise'),
-                  path('desktop/<int:pk>/delete', login_required(views.DeleteAnalysis.as_view()), name='delete_analise'),
-                  path('desktop/<int:pk>/analize', login_required(views.DoAnalysis.as_view()), name='analize'),
+                  path('desktop/<int:pk>/delete',
+                       login_required(views.DeleteAnalysis.as_view(), login_url=DEFAULT_LOGIN_URL),
+                       name='delete_analise'),
+                  path('desktop/<int:pk>/analize',
+                       login_required(views.DoAnalysis.as_view(), login_url=DEFAULT_LOGIN_URL), name='analize'),
               ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

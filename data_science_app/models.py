@@ -1,4 +1,5 @@
 from django.contrib.auth.models import User
+import os
 from django.db import models
 from django.utils.timezone import now
 
@@ -13,9 +14,12 @@ class Analise(models.Model):
     WD_Stop = models.FloatField(default=0, verbose_name="Конец сектора направления")
     WS_Start = models.FloatField(default=0, verbose_name="Начало диапазона скорости")
     WS_Stop = models.FloatField(default=0, verbose_name="Конец диапазона скорости")
+    # auto update now
+    # https://docs.djangoproject.com/en/2.0/ref/models/fields/#datefield
     Date_Create = models.DateField(default=now)
     Date_Modified = models.DateField(default=now)
-    File_Data = models.FileField(upload_to="upload_data")
+    File_Data = models.FileField(upload_to="upload_data",default="")
+    File_Zip = models.FileField(upload_to="downloads", default="")
 
     def __str__(self):
         return self.name
@@ -26,19 +30,10 @@ class Analise(models.Model):
 
     def delete(self, using=None, keep_parents=False):
         try:
+            # os.remove(self.File_Data)
+            # os.remove(self.File_Zip)
             self.File_Data.delete()
+            self.File_Zip.delete()
         except Exception:
             pass
         super(Analise, self).delete(using, keep_parents)
-
-
-class Output(models.Model):
-    data_avg = models.FileField(upload_to="data_avg/")
-    data_filtered = models.FileField(upload_to="data_filtered/")
-    ws_wd_graph = models.ImageField(upload_to="ws_wd_graph/")
-    hist_graph = models.ImageField(upload_to="hist_graph/")
-    time_graph = models.ImageField(upload_to="time_graph/")
-    rose_graph = models.ImageField(upload_to="rose_graph/")
-
-    class Meta:
-        verbose_name = "Вывод"

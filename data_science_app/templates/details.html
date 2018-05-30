@@ -4,6 +4,7 @@
 
 
 <div class="container">
+    {% if analise != 1 %}
     <br/>
     <div class="d-flex justify-content-between">
         <div>
@@ -71,5 +72,9 @@
         </tr>
         </tbody>
     </table>
+    {% else %}
+    <h1>Анализ не найден, возможно у вас нет доступа к нему</h1>
+    {% endif %}
+
 </div>
 {% endblock %}
