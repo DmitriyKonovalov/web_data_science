@@ -116,11 +116,13 @@ class DeleteAnalysis(generic.DeleteView):
 
 
 class AnalysisExecute(generic.View):
-    template_name = "execute.html"
+    template_name = "info.html"
     model = Analysis
     context_object_name = "analysis"
 
     def get(self, request, *args, **kwargs):
+        context = {}
+        context['mode'] = 'execute'
         analysis = Analysis.objects.get(id=kwargs['pk'])
         if analysis.user == request.user:
             output_dir = os.path.join(settings.MEDIA_ROOT, analysis.name)
@@ -138,9 +140,12 @@ class AnalysisExecute(generic.View):
             if os.path.exists(zip_pack_file):
                 os.remove(zip_pack_file)
 
-            return render(request, self.template_name, {'done': True})
+            context['success'] = True
+
+            return render(request, self.template_name, context)
         else:
-            return render(request, self.template_name, {'done': False})
+            context['success'] = False
+            return render(request, self.template_name, context)
 
     @staticmethod
     def create_dirs(*dirs):
@@ -196,8 +201,8 @@ class SearchView(generic.View):
         query = request.GET.get('q')
         if query is not None:
             founded = Analysis.objects.filter(
-                Q(name__icontains=query) | Q(WS__icontains=query) | Q(WD__icontains=query) |
-                Q(Date_Create__icontains=query) | Q(Date_Modified__icontains=query))
+                Q(name__icontains=query) | Q(ws__icontains=query) | Q(wd__icontains=query) |
+                Q(date_create__icontains=query) | Q(date_modified__icontains=query))
             print(founded)
             context['last_query'] = query
             context['user'] = request.user
@@ -216,4 +221,6 @@ class DownloadZip(generic.View):
             else:
                 return redirect(reverse_lazy('desktop'))
         else:
-            return render(request, "execute.html", {'done': False})
+            context = {}
+            context['mode'] = 'no_access'
+            return render(request, "info.html", context)
