@@ -1,21 +1,21 @@
-import os
-import zipfile
-import pandas as pd
-from django.conf import settings
-from django.contrib.auth import authenticate, login
 from django.contrib.auth.forms import UserCreationForm
-from django.core.files import File
-from django.db.models import Q
-from django.http import HttpResponse
-from django.shortcuts import render, redirect
-from django.urls import reverse_lazy
-from django.views import View, generic
+from django.contrib.auth import authenticate, login
 from data_science_app.forms import UserFormEdit
+from django.shortcuts import render, redirect
 from data_science_app.models import Analysis
 from ds_class.calculate import Calculate
 from ds_class.df_filter import DfFilter
+from django.views import View, generic
 from ds_class.df_group import DfGroup
+from django.http import HttpResponse
+from django.urls import reverse_lazy
 from ds_class.graphs import Graphs
+from django.core.files import File
+from django.conf import settings
+from django.db.models import Q
+import pandas as pd
+import zipfile
+import os
 
 
 class SignUp(View):

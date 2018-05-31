@@ -13,13 +13,13 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.conf import settings
-from django.conf.urls.static import static
-from django.contrib import admin
-from django.contrib.auth import views as auth_views
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import views as auth_views
+from django.conf.urls.static import static
+from data_science_app import views, api
+from django.conf import settings
+from django.contrib import admin
 from django.urls import path
-from data_science_app import views
 
 DEFAULT_LOGIN_URL = '/sign_in'
 urlpatterns = [
@@ -46,4 +46,7 @@ urlpatterns = [
                        login_required(views.AnalysisExecute.as_view(), login_url=DEFAULT_LOGIN_URL), name='execute'),
                   path('desktop/<int:pk>/download',
                        login_required(views.DownloadZip.as_view(), login_url=DEFAULT_LOGIN_URL), name='download'),
+                  path('api/client/analyses', api.client_get_analysis),
+                  path('api/client/users', api.client_get_users),
+
               ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -1,7 +1,5 @@
-from django import forms
 from django.contrib.auth.models import User
-
-from data_science_app.models import Analysis
+from django import forms
 
 
 class UserForm(forms.ModelForm):
