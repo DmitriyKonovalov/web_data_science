@@ -4,77 +4,73 @@
 
 
 <div class="container">
-    {% if analise != 1 %}
     <br/>
     <div class="d-flex justify-content-between">
         <div>
-            <a href="{% url 'edit_analise' analise.id %}" class="btn btn-outline-success">Изменить</a>
-            <a href="{% url 'delete_analise' analise.id %}" class="btn btn-outline-danger">Удалить</a>
+            <a href="{% url 'edit_analysis' analysis.id %}" class="btn btn-outline-success">Изменить</a>
+            <a href="{% url 'delete_analysis' analysis.id %}" class="btn btn-outline-danger">Удалить</a>
         </div>
         <a href="{% url 'desktop' %}" class="btn btn-outline-success">Рабочий стол</a>
-        <a href="{% url 'analize' analise.id %}" class="btn btn-outline-success">Выполнить расчеты</a>
+        <a href="{% url 'execute' analysis.id %}" class="btn btn-outline-success">Выполнить расчеты</a>
     </div>
-    <h4 class="d-flex justify-content-center"> Анализ {{ analise.name }} </h4>
+    <h4 class="d-flex justify-content-center"> Анализ {{ analysis.name }} </h4>
     <br/>
     <table class="table table-inverse table-hover">
         <tbody>
         <tr>
             <th>ID:</th>
-            <th>{{ analise.id }}</th>
+            <th>{{ analysis.id }}</th>
         </tr>
         <tr>
             <th>Имя:</th>
-            <th>{{ analise.name }}</th>
+            <th>{{ analysis.name }}</th>
         </tr>
         <tr>
             <th>Автор:</th>
-            <th>{{ analise.user }}</th>
+            <th>{{ analysis.user }}</th>
         </tr>
         <tr>
             <th>WS:</th>
-            <th>{{ analise.WS }}</th>
+            <th>{{ analysis.ws }}</th>
         </tr>
         <tr>
             <th>WD:</th>
-            <th>{{ analise.WD }}</th>
+            <th>{{ analysis.wd }}</th>
         </tr>
         <tr>
             <th>WD_Step:</th>
-            <th>{{ analise.WD_Step }}</th>
+            <th>{{ analysis.wd_step }}</th>
         </tr>
         <tr>
             <th>WD_Start:</th>
-            <th>{{ analise.WD_Start }}</th>
+            <th>{{ analysis.wd_start }}</th>
         </tr>
         <tr>
             <th>WD_Stop:</th>
-            <th>{{ analise.WD_Stop }}</th>
+            <th>{{ analysis.wd_stop }}</th>
         </tr>
         <tr>
             <th>WS_Start:</th>
-            <th>{{ analise.WS_Start }}</th>
+            <th>{{ analysis.ws_start }}</th>
         </tr>
         <tr>
             <th>WS_Stop:</th>
-            <th>{{ analise.WS_Stop }}</th>
+            <th>{{ analysis.ws_stop }}</th>
         </tr>
         <tr>
             <th>Дата создания:</th>
-            <th>{{ analise.Date_Create }}</th>
+            <th>{{ analysis.date_create }}</th>
         </tr>
         <tr>
             <th>Дата модификации:</th>
-            <th>{{ analise.Date_Modified }}</th>
+            <th>{{ analysis.date_modified }}</th>
         </tr>
         <tr>
             <th>Файл:</th>
-            <th>{{ analise.File_Data }}</th>
+            <th>{{ analysis.file_data }}</th>
         </tr>
         </tbody>
     </table>
-    {% else %}
-    <h1>Анализ не найден, возможно у вас нет доступа к нему</h1>
-    {% endif %}
 
 </div>
 {% endblock %}
