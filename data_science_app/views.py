@@ -221,6 +221,4 @@ class DownloadZip(generic.View):
             else:
                 return redirect(reverse_lazy('desktop'))
         else:
-            context = {}
-            context['mode'] = 'no_access'
-            return render(request, "info.html", context)
+            return render(request, "info.html", {'mode': 'no_access'})
