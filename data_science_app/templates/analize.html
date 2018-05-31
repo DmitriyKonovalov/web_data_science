@@ -1,5 +1,10 @@
 {% extends 'main.html' %}
 {% block title %} Анализ данных {% endblock %}
 {% block page %}
+{% if done %}
 <h2>Анализ выполнен</h2>
+{% else %}
+<h2>Анализ не выполнен</h2>
+<div>У вас не хватает прав доступа</div>
+{% endif %}
 {% endblock %}

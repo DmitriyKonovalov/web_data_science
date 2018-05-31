@@ -21,6 +21,7 @@ from django.contrib.auth.decorators import login_required
 from django.urls import path
 
 from data_science_app import views
+
 DEFAULT_LOGIN_URL = '/sign_in'
 urlpatterns = [
                   path('admin/', admin.site.urls),
@@ -44,4 +45,6 @@ urlpatterns = [
                        name='delete_analise'),
                   path('desktop/<int:pk>/analize',
                        login_required(views.DoAnalysis.as_view(), login_url=DEFAULT_LOGIN_URL), name='analize'),
+                  path('desktop/<int:pk>/download',
+                       login_required(views.DownloadZip.as_view(), login_url=DEFAULT_LOGIN_URL), name='download'),
               ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

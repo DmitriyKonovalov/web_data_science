@@ -1,7 +1,5 @@
 from django.contrib.auth.models import User
-import os
 from django.db import models
-from django.utils.timezone import now
 
 
 class Analise(models.Model):
@@ -14,10 +12,8 @@ class Analise(models.Model):
     WD_Stop = models.FloatField(default=0, verbose_name="Конец сектора направления")
     WS_Start = models.FloatField(default=0, verbose_name="Начало диапазона скорости")
     WS_Stop = models.FloatField(default=0, verbose_name="Конец диапазона скорости")
-    # auto update now
-    # https://docs.djangoproject.com/en/2.0/ref/models/fields/#datefield
-    Date_Create = models.DateField(default=now)
-    Date_Modified = models.DateField(default=now)
+    Date_Create = models.DateField(auto_now_add=True)
+    Date_Modified = models.DateField(auto_now=True)
     File_Data = models.FileField(upload_to="upload_data",default="")
     File_Zip = models.FileField(upload_to="downloads", default="")
 
@@ -30,8 +26,6 @@ class Analise(models.Model):
 
     def delete(self, using=None, keep_parents=False):
         try:
-            # os.remove(self.File_Data)
-            # os.remove(self.File_Zip)
             self.File_Data.delete()
             self.File_Zip.delete()
         except Exception:
