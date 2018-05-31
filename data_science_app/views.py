@@ -207,14 +207,13 @@ class SearchView(generic.View):
 
 class DownloadZip(generic.View):
     def get(self, request, *args, **kwargs):
-        analise = Analysis.objects.get(id=kwargs['pk'])
-        if analise.user == request.user:
-            if analise.file_zip == "":
-                response = HttpResponse(analise.file_zip)
-                response["Content-Disposition"] = 'attachment; filename="{}.zip"'.format(analise.name)
+        analysis = Analysis.objects.get(id=kwargs['pk'])
+        if analysis.user == request.user:
+            if analysis.file_zip != "":
+                response = HttpResponse(analysis.file_zip)
+                response["Content-Disposition"] = 'attachment; filename="{}.zip"'.format(analysis.name)
                 return response
             else:
                 return redirect(reverse_lazy('desktop'))
-
         else:
             return render(request, "execute.html", {'done': False})

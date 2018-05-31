@@ -20,6 +20,7 @@
             <th>WS_Stop</th>
             <th>Дата создания</th>
             <th>Дата изменения</th>
+            <th>Результат</th>
         </tr>
         </thead>
         <tbody>
@@ -37,6 +38,19 @@
             <td>{{ analysis.ws_stop }}</td>
             <td>{{ analysis.date_create }}</td>
             <td>{{ analysis.date_modified }}</td>
+            {% if analysis.file_zip != ""%}
+            <td><a href="{% url 'download' analysis.id %}" class="btn btn-outline-success"><img
+                    src="https://maxcdn.icons8.com/windows10/PNG/96/Network/download_from_cloud-96.png" width="30"
+                    height="30"></a></td>
+            {% else %}
+            <td><a href="{% url 'execute' analysis.id %}" class="btn btn-outline-success"><img
+                    src="https://image.flaticon.com/icons/png/128/14/14975.png" width="30"
+                    height="30"></a></td>
+            {% endif %}
+            <td><a href="{% url 'delete_analysis' analysis.id %}" class="btn btn-outline-danger"><img
+                    src="https://openclipart.org/image/90px/svg_to_png/226230/trash.png" width="15"
+                    height="15"></a></td>
+
         </tr>
         {% endif %}
         {% endfor %}
