@@ -16,8 +16,8 @@ from django.db.models import Q
 import pandas as pd
 import zipfile
 import os
-
-
+# todo API -> не facebook
+#todo createview
 class SignUp(View):
     template_name = "sign_up.html"
 
@@ -36,7 +36,7 @@ class SignUp(View):
             return redirect(reverse_lazy("user"))
         return redirect(reverse_lazy("sign_up"))
 
-
+#todo updateview
 class UserEdit(View):
     template_name = "user.html"
 
@@ -56,9 +56,7 @@ class Desktop(generic.ListView):
     template_name = "desktop.html"
     model = Analysis
     context_object_name = "analyses"
-
-    def get_queryset(self):
-        return Analysis.objects.all()
+    queryset = Analysis.objects.all()
 
 
 class Details(generic.DetailView):
@@ -114,7 +112,8 @@ class DeleteAnalysis(generic.DeleteView):
         queryset = super(DeleteAnalysis, self).get_queryset()
         return queryset.filter(user=self.request.user)
 
-
+#todo ошибка а не инфо 403 forb.
+#todo анализ в класс
 class AnalysisExecute(generic.View):
     template_name = "info.html"
     model = Analysis
@@ -133,15 +132,14 @@ class AnalysisExecute(generic.View):
             self.packing_zip(output_dir, download_dir, analysis.name)
 
             zip_pack_file = os.path.join(download_dir, f'{analysis.name}_pack.zip')
+
             zip_pack = File(open(zip_pack_file, 'rb'))
             analysis.file_zip.save(f'{analysis.name}.zip', zip_pack, save=True)
             zip_pack.close()
 
             if os.path.exists(zip_pack_file):
                 os.remove(zip_pack_file)
-
             context['success'] = True
-
             return render(request, self.template_name, context)
         else:
             context['success'] = False
@@ -192,7 +190,7 @@ class AnalysisExecute(generic.View):
         zip_archive.close()
         return zip_archive
 
-
+#todo в класс листвью
 class SearchView(generic.View):
     template_name = "search.html"
 
@@ -209,7 +207,7 @@ class SearchView(generic.View):
             context['analysis_list'] = founded
         return render(request, self.template_name, context)
 
-
+# todo 502: если анализа нет вернуть 404
 class DownloadZip(generic.View):
     def get(self, request, *args, **kwargs):
         analysis = Analysis.objects.get(id=kwargs['pk'])
