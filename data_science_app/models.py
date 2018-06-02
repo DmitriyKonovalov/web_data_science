@@ -23,7 +23,7 @@ class Analysis(models.Model):
     class Meta:
         verbose_name = "Анализ"
         verbose_name_plural = "Анализы"
-        ordering = ["date_modified"]
+        ordering = ["-date_modified"]
 
     def delete(self, using=None, keep_parents=False):
         try:

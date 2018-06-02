@@ -60,6 +60,7 @@ class Desktop(generic.ListView):
         context['analyses'] = self.get_queryset()
         return context
 
+
 class Details(generic.DetailView):
     template_name = "details.html"
     model = Analysis
@@ -114,14 +115,11 @@ class DeleteAnalysis(generic.DeleteView):
         return queryset.filter(user=self.request.user)
 
 
-class AnalysisExecute(generic.View):
-    template_name = "info.html"
+class AnalysisExecute(generic.RedirectView):
     model = Analysis
     context_object_name = "analysis"
 
     def get(self, request, *args, **kwargs):
-        context = {}
-        context['mode'] = 'execute'
         analysis = Analysis.objects.get(id=kwargs['pk'])
         if analysis.user == request.user:
             output_dir = os.path.join(settings.MEDIA_ROOT, analysis.name)
@@ -144,8 +142,7 @@ class AnalysisExecute(generic.View):
 
             if os.path.exists(zip_pack_file):
                 os.remove(zip_pack_file)
-            context['success'] = True
-            return render(request, self.template_name, context)
+            return redirect(reverse_lazy('desktop'))
         else:
             raise PermissionDenied
 
