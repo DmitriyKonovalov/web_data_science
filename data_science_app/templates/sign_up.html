@@ -1,11 +1,12 @@
 {% extends 'base_sign.html' %}
 {% load bootstrap3 %}
 {% block title %} Регистрация {% endblock %}
+{% block heading %}Страница регистрации!{% endblock %}
 {% block page %}
-<form class="form-signin" role="form" method="POST" enctype="multipart/form-data">
+<form class="form-signup" role="form" method="POST" enctype="multipart/form-data">
     {% csrf_token %}
-    {% bootstrap_form user_form %}
-    <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+    {% bootstrap_form form %}
+    <button class="btn btn-lg btn-primary btn-block" type="submit">Sign up</button>
     <a href="{% url 'sign_in' %}">У Вас есть профиль?</a>
 </form>
 {% endblock %}

@@ -19,31 +19,18 @@ import os
 
 PAGINATION_PAGES = 4
 
-# todo createview
-class SignUp(View):
+
+class SignUp(generic.CreateView):
     template_name = "sign_up.html"
-
-    def get(self, request):
-        user_form = UserCreationForm()
-        return render(request, self.template_name, {'user_form': user_form})
-
-    def post(self, request):
-        user_form = UserCreationForm(request.POST)
-        if user_form.is_valid():
-            user_form.save()
-            username = user_form.cleaned_data.get('username')
-            password = user_form.cleaned_data.get('password1')
-            user = authenticate(username=username, password=password)
-            login(request, user)
-            return redirect(reverse_lazy("user"))
-        return redirect(reverse_lazy("sign_up"))
+    model = User
+    form_class = UserCreationForm
+    success_url = reverse_lazy("user")
 
 
 class UserEdit(generic.UpdateView):
     model = User
     form_class = UserFormEdit
     template_name = "user.html"
-    context_object_name = 'form'
     success_url = reverse_lazy("desktop")
 
     def get_object(self, queryset=None):
