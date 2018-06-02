@@ -1,3 +1,5 @@
+import shutil
+
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.forms import UserCreationForm
@@ -140,6 +142,8 @@ class AnalysisExecute(generic.RedirectView):
             analysis.file_zip.save(f'{analysis.name}.zip', zip_pack, save=True)
             zip_pack.close()
 
+            shutil.rmtree(os.path.join(settings.MEDIA_ROOT, analysis.name))
+
             if os.path.exists(zip_pack_file):
                 os.remove(zip_pack_file)
             return redirect(reverse_lazy('desktop'))
@@ -174,8 +178,10 @@ class SearchView(generic.ListView):
     def get_queryset(self):
         query = self.request.GET.get('q')
         founded = Analysis.objects.filter((
-            Q(name__icontains=query) | Q(ws__icontains=query) | Q(wd__icontains=query) |
-            Q(date_create__icontains=query) | Q(date_modified__icontains=query)) & Q(user=self.request.user))
+                                                  Q(name__icontains=query) | Q(ws__icontains=query) | Q(
+                                              wd__icontains=query) |
+                                                  Q(date_create__icontains=query) | Q(
+                                              date_modified__icontains=query)) & Q(user=self.request.user))
 
         paginator = Paginator(founded, PAGINATION_PAGES)
         page = self.request.GET.get('page')
