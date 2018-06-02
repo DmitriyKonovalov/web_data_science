@@ -19,7 +19,7 @@ from django.conf.urls.static import static
 from data_science_app import views, api
 from django.conf import settings
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path
 
 DEFAULT_LOGIN_URL = '/sign_in'
 urlpatterns = [
@@ -48,6 +48,5 @@ urlpatterns = [
                        login_required(views.DownloadZip.as_view(), login_url=DEFAULT_LOGIN_URL), name='download'),
                   path('api/client/analyses', api.client_get_analysis),
                   path('api/client/users', api.client_get_users),
-                  path('api/social', include('rest_framework_social_oauth2.urls')),
 
               ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
