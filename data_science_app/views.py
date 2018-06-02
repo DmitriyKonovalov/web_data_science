@@ -3,21 +3,18 @@ from django.contrib.auth import authenticate, login
 from data_science_app.forms import UserFormEdit
 from django.shortcuts import render, redirect
 from data_science_app.models import Analysis
-from ds_class.calculate import Calculate
-from ds_class.df_filter import DfFilter
 from django.views import View, generic
-from ds_class.df_group import DfGroup
 from django.http import HttpResponse
 from django.urls import reverse_lazy
-from ds_class.graphs import Graphs
 from django.core.files import File
 from django.conf import settings
 from django.db.models import Q
-import pandas as pd
+from ds_class.ds_class import DataScienceRun
 import zipfile
 import os
-# todo API -> не facebook
-#todo createview
+
+
+# todo createview
 class SignUp(View):
     template_name = "sign_up.html"
 
@@ -36,7 +33,8 @@ class SignUp(View):
             return redirect(reverse_lazy("user"))
         return redirect(reverse_lazy("sign_up"))
 
-#todo updateview
+
+# todo updateview
 class UserEdit(View):
     template_name = "user.html"
 
@@ -112,8 +110,9 @@ class DeleteAnalysis(generic.DeleteView):
         queryset = super(DeleteAnalysis, self).get_queryset()
         return queryset.filter(user=self.request.user)
 
-#todo ошибка а не инфо 403 forb.
-#todo анализ в класс
+
+# todo ошибка а не инфо 403 forb.
+# todo анализ в класс
 class AnalysisExecute(generic.View):
     template_name = "info.html"
     model = Analysis
@@ -128,7 +127,13 @@ class AnalysisExecute(generic.View):
             download_dir = os.path.join(settings.MEDIA_ROOT, "downloads")
 
             self.create_dirs(output_dir, download_dir)
-            self.data_science_execute(analysis, output_dir)
+
+            analysis_dict = analysis.__dict__
+            analysis_dict['file_data'] = analysis.file_data.path
+
+            ds_runner = DataScienceRun(analysis_dict, output_dir)
+            ds_runner.data_science_execute()
+
             self.packing_zip(output_dir, download_dir, analysis.name)
 
             zip_pack_file = os.path.join(download_dir, f'{analysis.name}_pack.zip')
@@ -152,30 +157,6 @@ class AnalysisExecute(generic.View):
                 os.mkdir(dir)
 
     @staticmethod
-    def data_science_execute(analysis, output_dir):
-        df = DfFilter(pd.read_csv(analysis.file_data.path, sep=';', index_col="Timestamp"))
-
-        df.first_filter()
-        df.general_filter(analysis.ws, analysis.ws_start, analysis.ws_stop)
-        df.general_filter(analysis.wd, analysis.wd_start, analysis.wd_stop)
-        df.df_filtered["AD_1"] = Calculate.ad(df.df_filtered)
-        filtered_file = "{}_filtered.csv".format(analysis.name)
-
-        pd.DataFrame.to_csv(df.df_filtered, os.path.join(output_dir, filtered_file))
-        df_group = DfGroup(df.df_filtered)
-        df_group.group_df(analysis.wd, analysis.wd_start, analysis.wd_stop, analysis.wd_step)
-        df_group.df_grouped = df_group.df_grouped.mean()
-        group_file = "{}_group.csv".format(analysis.name)
-
-        pd.DataFrame.to_csv(df_group.df_grouped, os.path.join(output_dir, group_file))
-
-        graph = Graphs(df.df_filtered, df_group.df_grouped)
-        graph.wind_rose(analysis.wd, analysis.wd_step, os.path.join(output_dir, '{}_wd_rose.png'.format(analysis.name)))
-        graph.hist(analysis.ws, os.path.join(output_dir, '{}_hist.png'.format(analysis.name)))
-        graph.time("AD_1", os.path.join(output_dir, '{}_time.png'.format(analysis.name)))
-        graph.ws_wd(analysis.wd, analysis.ws, os.path.join(output_dir, '{}_ws_wd.png'.format(analysis.name)))
-
-    @staticmethod
     def packing_zip(from_dir, to_dir, name_zip):
         if os.path.exists(os.path.join(to_dir, f'{name_zip}.zip')):
             os.remove(os.path.join(to_dir, f'{name_zip}.zip'))
@@ -190,7 +171,8 @@ class AnalysisExecute(generic.View):
         zip_archive.close()
         return zip_archive
 
-#todo в класс листвью
+
+# todo в класс листвью
 class SearchView(generic.View):
     template_name = "search.html"
 
@@ -206,6 +188,7 @@ class SearchView(generic.View):
             context['user'] = request.user
             context['analysis_list'] = founded
         return render(request, self.template_name, context)
+
 
 # todo 502: если анализа нет вернуть 404
 class DownloadZip(generic.View):
