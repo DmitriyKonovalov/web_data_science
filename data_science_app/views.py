@@ -1,21 +1,21 @@
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import authenticate, login
 from django.core.exceptions import PermissionDenied
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from data_science_app.forms import UserFormEdit
-from django.shortcuts import render, redirect, get_object_or_404
 from data_science_app.models import Analysis
+from ds_class.ds_class import DataScienceRun
+from django.contrib.auth.models import User
 from django.views import View, generic
 from django.http import HttpResponse
 from django.urls import reverse_lazy
 from django.core.files import File
 from django.conf import settings
 from django.db.models import Q
-from ds_class.ds_class import DataScienceRun
+from django.http import Http404
 import zipfile
 import os
-from django.http import Http404
-
 
 PAGINATION_PAGES = 4
 
@@ -39,20 +39,15 @@ class SignUp(View):
         return redirect(reverse_lazy("sign_up"))
 
 
-# todo updateview
-class UserEdit(View):
+class UserEdit(generic.UpdateView):
+    model = User
+    form_class = UserFormEdit
     template_name = "user.html"
+    context_object_name = 'form'
+    success_url = reverse_lazy("desktop")
 
-    def get(self, request):
-        user_form = UserFormEdit(instance=request.user)
-        return render(request, self.template_name, {'user_form': user_form})
-
-    def post(self, request):
-        user_form = UserFormEdit(request.POST, instance=request.user)
-        if user_form.is_valid():
-            user_form.save()
-            return redirect(reverse_lazy("desktop"))
-        return redirect(reverse_lazy("user"))
+    def get_object(self, queryset=None):
+        return self.request.user
 
 
 class Desktop(generic.ListView):
