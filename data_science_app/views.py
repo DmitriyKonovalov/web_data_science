@@ -1,7 +1,7 @@
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import authenticate, login
 from django.core.exceptions import PermissionDenied
-
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from data_science_app.forms import UserFormEdit
 from django.shortcuts import render, redirect, get_object_or_404
 from data_science_app.models import Analysis
@@ -16,6 +16,8 @@ import zipfile
 import os
 from django.http import Http404
 
+
+PAGINATION_PAGES = 4
 
 # todo createview
 class SignUp(View):
@@ -53,13 +55,28 @@ class UserEdit(View):
         return redirect(reverse_lazy("user"))
 
 
-# todo pagination
 class Desktop(generic.ListView):
     template_name = "desktop.html"
     model = Analysis
     context_object_name = "analyses"
     queryset = Analysis.objects.all()
 
+    def get_queryset(self):
+        queryset = super(Desktop, self).get_queryset()
+        paginator = Paginator(queryset.filter(user=self.request.user), PAGINATION_PAGES)
+        page = self.request.GET.get('page')
+        try:
+            analyses = paginator.page(page)
+        except PageNotAnInteger:
+            analyses = paginator.page(1)
+        except EmptyPage:
+            analyses = paginator.page(paginator.num_pages)
+        return analyses
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = {}
+        context['analyses'] = self.get_queryset()
+        return context
 
 class Details(generic.DetailView):
     template_name = "details.html"
@@ -177,12 +194,22 @@ class SearchView(generic.ListView):
 
     def get_queryset(self):
         query = self.request.GET.get('q')
-        founded = Analysis.objects.filter(
+        founded = Analysis.objects.filter((
             Q(name__icontains=query) | Q(ws__icontains=query) | Q(wd__icontains=query) |
-            Q(date_create__icontains=query) | Q(date_modified__icontains=query))
+            Q(date_create__icontains=query) | Q(date_modified__icontains=query)) & Q(user=self.request.user))
+
+        paginator = Paginator(founded, PAGINATION_PAGES)
+        page = self.request.GET.get('page')
+        try:
+            founded = paginator.page(page)
+        except PageNotAnInteger:
+            founded = paginator.page(1)
+        except EmptyPage:
+            founded = paginator.page(paginator.num_pages)
         return founded
 
     def get_context_data(self, *, object_list=None, **kwargs):
+
         context = {}
         query = self.request.GET.get('q')
         context['last_query'] = query
@@ -194,14 +221,14 @@ class SearchView(generic.ListView):
 class DownloadZip(generic.View):
 
     def get(self, request, *args, **kwargs):
-        analysis = get_object_or_404(Analysis, pk=kwargs['pk'])
-        if analysis.user == request.user:
-            if analysis.file_zip != "":
-                response = HttpResponse(analysis.file_zip)
-                response["Content-Disposition"] = 'attachment; filename="{}.zip"'.format(analysis.name)
-                return response
+        try:
+            analysis = get_object_or_404(Analysis, pk=kwargs['pk'])
+            if analysis.user == request.user:
+                if analysis.file_zip != "":
+                    response = HttpResponse(analysis.file_zip)
+                    response["Content-Disposition"] = 'attachment; filename="{}.zip"'.format(analysis.name)
+                    return response
             else:
-                raise Http404
-
-        else:
-            raise PermissionDenied
+                raise PermissionDenied
+        except:
+            raise Http404

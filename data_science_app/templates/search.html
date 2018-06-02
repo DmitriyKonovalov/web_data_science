@@ -7,6 +7,26 @@
     <div class="d-flex justify-content-center">
         <h1>Поиск по запросу: "{{last_query}}"</h1></div>
     <br/>
+    <div class="pagination">
+
+    {% if analysis_list.has_previous %}
+        <a href="?q={{last_query}}&page={{ analysis_list.previous_page_number }}">←</a>
+    {% endif %}
+
+    {% for num in analysis_list.paginator.page_range %}
+        {% if num == analysis_list.number %}
+            <span class="current"><b>{{ num }}</b></span>
+        {% else %}
+            <a href="?q={{last_query}}&page={{ num }}"> {{ num }}</a>
+        {% endif %}
+    {% endfor %}
+
+    {% if analysis_list.has_next %}
+        <a href="?q={{last_query}}&page={{ analysis_list.next_page_number }}">→</a>
+    {% endif %}
+
+</div>
+
     {% if analysis_list %}
     <table class="table table-inverse table-hover">
         <thead>
@@ -44,7 +64,7 @@
         {% endfor %}
         </tbody>
     </table>
-    {% else %}
+        {% else %}
     <p>Не найдено публикаций по вашему запросу<br>Попробуйте повторить запрос с другой формулировкой</p>
     {% endif %}
 </div>
