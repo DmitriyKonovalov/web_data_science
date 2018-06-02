@@ -1,7 +1,9 @@
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import authenticate, login
+from django.core.exceptions import PermissionDenied
+
 from data_science_app.forms import UserFormEdit
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from data_science_app.models import Analysis
 from django.views import View, generic
 from django.http import HttpResponse
@@ -12,6 +14,7 @@ from django.db.models import Q
 from ds_class.ds_class import DataScienceRun
 import zipfile
 import os
+from django.http import Http404
 
 
 # todo createview
@@ -50,6 +53,7 @@ class UserEdit(View):
         return redirect(reverse_lazy("user"))
 
 
+# todo pagination
 class Desktop(generic.ListView):
     template_name = "desktop.html"
     model = Analysis
@@ -90,7 +94,7 @@ class EditAnalysis(generic.UpdateView):
 
     def get_object(self, queryset=None):
         obj = super(EditAnalysis, self).get_object(queryset=queryset)
-        return obj
+        return obj or Http404
 
     def get_queryset(self):
         queryset = super(EditAnalysis, self).get_queryset()
@@ -111,8 +115,6 @@ class DeleteAnalysis(generic.DeleteView):
         return queryset.filter(user=self.request.user)
 
 
-# todo ошибка а не инфо 403 forb.
-# todo анализ в класс
 class AnalysisExecute(generic.View):
     template_name = "info.html"
     model = Analysis
@@ -135,7 +137,6 @@ class AnalysisExecute(generic.View):
             ds_runner.data_science_execute()
 
             self.packing_zip(output_dir, download_dir, analysis.name)
-
             zip_pack_file = os.path.join(download_dir, f'{analysis.name}_pack.zip')
 
             zip_pack = File(open(zip_pack_file, 'rb'))
@@ -147,8 +148,7 @@ class AnalysisExecute(generic.View):
             context['success'] = True
             return render(request, self.template_name, context)
         else:
-            context['success'] = False
-            return render(request, self.template_name, context)
+            raise PermissionDenied
 
     @staticmethod
     def create_dirs(*dirs):
@@ -172,34 +172,36 @@ class AnalysisExecute(generic.View):
         return zip_archive
 
 
-# todo в класс листвью
-class SearchView(generic.View):
+class SearchView(generic.ListView):
     template_name = "search.html"
 
-    def get(self, request, *args, **kwargs):
+    def get_queryset(self):
+        query = self.request.GET.get('q')
+        founded = Analysis.objects.filter(
+            Q(name__icontains=query) | Q(ws__icontains=query) | Q(wd__icontains=query) |
+            Q(date_create__icontains=query) | Q(date_modified__icontains=query))
+        return founded
+
+    def get_context_data(self, *, object_list=None, **kwargs):
         context = {}
-        query = request.GET.get('q')
-        if query is not None:
-            founded = Analysis.objects.filter(
-                Q(name__icontains=query) | Q(ws__icontains=query) | Q(wd__icontains=query) |
-                Q(date_create__icontains=query) | Q(date_modified__icontains=query))
-            print(founded)
-            context['last_query'] = query
-            context['user'] = request.user
-            context['analysis_list'] = founded
-        return render(request, self.template_name, context)
+        query = self.request.GET.get('q')
+        context['last_query'] = query
+        context['user'] = self.request.user
+        context['analysis_list'] = self.get_queryset()
+        return context
 
 
-# todo 502: если анализа нет вернуть 404
 class DownloadZip(generic.View):
+
     def get(self, request, *args, **kwargs):
-        analysis = Analysis.objects.get(id=kwargs['pk'])
+        analysis = get_object_or_404(Analysis, pk=kwargs['pk'])
         if analysis.user == request.user:
             if analysis.file_zip != "":
                 response = HttpResponse(analysis.file_zip)
                 response["Content-Disposition"] = 'attachment; filename="{}.zip"'.format(analysis.name)
                 return response
             else:
-                return redirect(reverse_lazy('desktop'))
+                raise Http404
+
         else:
-            return render(request, "info.html", {'mode': 'no_access'})
+            raise PermissionDenied
