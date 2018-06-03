@@ -3,6 +3,8 @@ from rest_framework import serializers
 
 
 class AnalysisSerializer(serializers.ModelSerializer):
+    user = serializers.ReadOnlyField(source='User')
+
     class Meta:
         model = Analysis
         fields = ('id', 'user', 'name', 'ws', 'wd', 'wd_step', 'wd_start', 'wd_stop', 'ws_start', 'ws_stop',

@@ -66,5 +66,7 @@ urlpatterns = [
 
                   path('analyses/', views.AnalysisList.as_view()),
                   path('analyses/<int:pk>/', views.AnalysisDetail.as_view()),
+                  path('users/', views.AnalysisList.as_view()),
+                  path('users/<int:pk>/', views.AnalysisDetail.as_view()),
               ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 urlpatterns = format_suffix_patterns(urlpatterns)

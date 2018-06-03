@@ -3,7 +3,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.forms import UserCreationForm
 from rest_framework import viewsets, mixins, generics
 from rest_framework.views import APIView
-
+from rest_framework import permissions
+from data_science_app.permissions import IsOwnerOrReadOnly
 from data_science_app.serializers import UserSerializer, AnalysisSerializer
 from django.core.exceptions import PermissionDenied
 from data_science_app.forms import UserFormEdit
@@ -183,11 +184,9 @@ class SearchView(generic.ListView):
 
     def get_queryset(self):
         query = self.request.GET.get('q')
-        founded = Analysis.objects.filter((
-                                                  Q(name__icontains=query) | Q(ws__icontains=query) | Q(
-                                              wd__icontains=query) |
-                                                  Q(date_create__icontains=query) | Q(
-                                              date_modified__icontains=query)) & Q(user=self.request.user))
+        founded = Analysis.objects.filter((Q(name__icontains=query) | Q(ws__icontains=query) | Q(
+            wd__icontains=query) | Q(date_create__icontains=query) | Q(date_modified__icontains=query)) & Q(
+            user=self.request.user))
 
         paginator = Paginator(founded, PAGINATION_PAGES)
         page = self.request.GET.get('page')
@@ -200,7 +199,6 @@ class SearchView(generic.ListView):
         return founded
 
     def get_context_data(self, *, object_list=None, **kwargs):
-
         context = {}
         query = self.request.GET.get('q')
         context['last_query'] = query
@@ -225,11 +223,29 @@ class DownloadZip(generic.View):
             raise Http404
 
 
+# todo desktop.html Если файла с таблицей нет, то кнопка с расчетами (выбрать, недоступна, и тд)
+
+
 class AnalysisList(generics.ListCreateAPIView):
     queryset = Analysis.objects.all()
     serializer_class = AnalysisSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
 
 
 class AnalysisDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Analysis.objects.all()
     serializer_class = AnalysisSerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,
+                          IsOwnerOrReadOnly,)
+
+
+class UserList(generics.ListCreateAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+
+class UserDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
