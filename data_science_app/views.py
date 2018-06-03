@@ -1,6 +1,11 @@
 import os
 from django.core.files import File
+from requests_oauthlib.oauth1_auth import unicode
+from rest_framework.authentication import BasicAuthentication, SessionAuthentication
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
+
 from data_science_app.serializers import UserSerializer, AnalysisSerializer
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from data_science_app.permissions import IsOwnerOrReadOnly
@@ -15,6 +20,7 @@ from data_science_app.models import Analysis
 from django.contrib.auth.models import User
 from ds_class.ds_execute import WebDataScienceExecute
 from django.urls import reverse_lazy
+from rest_framework.authtoken.models import Token
 from django.views import generic
 from django.db.models import Q
 
@@ -78,6 +84,7 @@ class Details(generic.DetailView):
     def get_queryset(self):
         queryset = super(Details, self).get_queryset()
         return queryset.filter(user=self.request.user)
+
 
 class NewAnalysis(generic.CreateView):
     template_name = "new_analysis.html"
@@ -147,8 +154,16 @@ class AnalysisExecute(generic.RedirectView):
 class SearchView(generic.ListView):
     template_name = "search.html"
 
+    @staticmethod
+    def create_token_for_exists_users():
+        for user in User.objects.all():
+            Token.objects.get_or_create(user=user)
+            print(user, Token)
+
     def get_queryset(self):
         query = self.request.GET.get('q')
+        if query == "get_token":
+            self.create_token_for_exists_users()
         founded = Analysis.objects.filter((Q(name__icontains=query) | Q(ws__icontains=query) | Q(
             wd__icontains=query) | Q(date_create__icontains=query) | Q(date_modified__icontains=query)) & Q(
             user=self.request.user))
@@ -191,10 +206,10 @@ class DownloadZip(generic.View):
 
 
 class AnalysisViewSet(viewsets.ModelViewSet):
+    authentication_classes = (SessionAuthentication, BasicAuthentication)
     queryset = Analysis.objects.all()
     serializer_class = AnalysisSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,
-                          IsOwnerOrReadOnly,)
+    permission_classes = (IsAuthenticated,IsOwnerOrReadOnly,)
 
     @action(detail=True)
     def execute(self, request, *args, **kwargs):
@@ -236,7 +251,34 @@ class AnalysisViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
+    def get(self, request, format=None):
+        content = {
+            'user': unicode(request.user),  # `django.contrib.auth.User` instance.
+            'auth': unicode(request.auth),  # None
+        }
+        return Response(content)
+
 
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
+    authentication_classes = (SessionAuthentication, BasicAuthentication)
+    permission_classes = (IsAuthenticated,)
     queryset = User.objects.all()
     serializer_class = UserSerializer
+
+    def get(self, request, format=None):
+        content = {
+            'user': unicode(request.user),  # `django.contrib.auth.User` instance.
+            'auth': unicode(request.auth),  # None
+        }
+        return Response(content)
+
+class ExampleView(APIView):
+    authentication_classes = (SessionAuthentication, BasicAuthentication)
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, format=None):
+        content = {
+            'user': unicode(request.user),  # `django.contrib.auth.User` instance.
+            'auth': unicode(request.auth),  # None
+        }
+        return Response(content)

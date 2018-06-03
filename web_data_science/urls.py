@@ -21,7 +21,7 @@ from django.conf.urls import include
 from django.conf import settings
 from django.contrib import admin
 from django.urls import path
-
+from rest_framework.authtoken import views as rest_views
 from rest_framework import routers
 
 DEFAULT_LOGIN_URL = '/sign_in'
@@ -56,4 +56,5 @@ urlpatterns = [
                        login_required(views.DownloadZip.as_view(), login_url=DEFAULT_LOGIN_URL), name='download'),
 
                   path('', include(router.urls)),
+                  path('token-auth/', rest_views.obtain_auth_token),
               ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
