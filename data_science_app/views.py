@@ -25,7 +25,6 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-
 PAGINATION_PAGES = 4
 
 
@@ -226,18 +225,7 @@ class DownloadZip(generic.View):
             raise Http404
 
 
-#class UserViewSet(viewsets.ModelViewSet):
-#    queryset = User.objects.all().order_by('id')
-#    serializer_class = UserSerializer
-
-
-#class AnalysesViewSet(viewsets.ModelViewSet):
-#    queryset = Analysis.objects.all()
-#    serializer_class = AnalysisSerializer
-
-
-class AnalysisList(mixins.ListModelMixin,
-                  mixins.CreateModelMixin,generics.GenericAPIView):
+class AnalysisList(mixins.ListModelMixin, mixins.CreateModelMixin, generics.GenericAPIView):
     queryset = Analysis.objects.all()
     serializer_class = AnalysisSerializer
 
@@ -246,42 +234,18 @@ class AnalysisList(mixins.ListModelMixin,
 
     def post(self, request, *args, **kwargs):
         return self.create(request, *args, **kwargs)
-    #def get(self, request, format=None):
-    #    analyses = Analysis.objects.all()
-    #    serializer = AnalysisSerializer(analyses, many=True)
-    #    return Response(serializer.data)
 
-    #def post(self, request, format=None):
-    #    serializer = AnalysisSerializer(data=request.data)
-    #    if serializer.is_valid():
-    #        serializer.save()
-    #        return Response(serializer.data, status=status.HTTP_201_CREATED)
-    #    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class AnalysisDetail(APIView):
+class AnalysisDetail(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin,
+                     generics.GenericAPIView):
     queryset = Analysis.objects.all()
     serializer_class = AnalysisSerializer
 
-    def get_object(self, pk):
-        try:
-            return Analysis.objects.get(pk=pk)
-        except:
-            raise Http404
+    def get(self, request, *args, **kwargs):
+        return self.retrieve(request, *args, **kwargs)
 
-    def get(self, request, pk, format=None):
-        analysis = self.get_object(pk)
-        serializer = AnalysisSerializer(analysis)
-        return Response(serializer.data)
+    def put(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)
 
-    def put(self, request, pk, format=None):
-        analysis = self.get_object(pk)
-        serializer = AnalysisSerializer(analysis, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def delete(self, request, pk, format=None):
-        analysis = self.get_object(pk)
-        analysis.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+    def delete(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)
