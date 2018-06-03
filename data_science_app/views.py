@@ -1,3 +1,5 @@
+import os
+from django.core.files import File
 from rest_framework.response import Response
 
 from data_science_app.serializers import UserSerializer, AnalysisSerializer
@@ -7,15 +9,17 @@ from django.shortcuts import redirect, get_object_or_404
 from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import PermissionDenied
 from rest_framework import viewsets, permissions, status
+from django.conf import settings
 from data_science_app.forms import UserFormEdit
 from django.http import HttpResponse, Http404
 from rest_framework.decorators import action
 from data_science_app.models import Analysis
 from django.contrib.auth.models import User
-from ds_class.ds_execute import DataScienceExecute
+from ds_class.ds_execute import WebDataScienceExecute
 from django.urls import reverse_lazy
 from django.views import generic
 from django.db.models import Q
+
 PAGINATION_PAGES = 4
 
 
@@ -121,7 +125,7 @@ class AnalysisExecute(generic.RedirectView):
     def get(self, request, *args, **kwargs):
         analysis = Analysis.objects.get(id=kwargs['pk'])
         if analysis.user == request.user:
-            execute = DataScienceExecute(analysis)
+            execute = WebDataScienceExecute(analysis)
             execute.execute()
             return redirect(reverse_lazy('desktop'))
         else:
@@ -183,8 +187,22 @@ class AnalysisViewSet(viewsets.ModelViewSet):
         analysis = self.get_object()
         if request.user == analysis.user:
             try:
-                execute = DataScienceExecute(analysis)
+                execute = WebDataScienceExecute(analysis)
                 execute.execute()
+                return Response({}, status=status.HTTP_200_OK)
+            except:
+                raise Http404
+        raise PermissionDenied
+
+    @action(methods=['post'], detail=True)
+    def load_file_data(self, request, *args, **kwargs):
+        analysis = self.get_object()
+        if request.user == analysis.user:
+            try:
+                file_name = request.data['file_path']
+                file_data = File(open(file_name, 'r'))
+                analysis.file_data.save (f'{analysis.name}.csv', file_data, save=True)
+                file_data.close()
                 return Response({}, status=status.HTTP_200_OK)
             except:
                 raise Http404

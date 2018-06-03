@@ -1,13 +1,12 @@
-import os
-import shutil
-import zipfile
-
+from ds_class.ds_class import DataScienceRun
 from django.core.files import File
 from django.conf import settings
-from ds_class.ds_class import DataScienceRun
+import zipfile
+import shutil
+import os
 
 
-class DataScienceExecute():
+class WebDataScienceExecute():
     def __init__(self, analysis):
         self.analysis = analysis
 
@@ -20,7 +19,6 @@ class DataScienceExecute():
 
         ds_runner = DataScienceRun(analysis_dict, output_dir)
         ds_runner.data_science_execute()
-
         self.packing_zip(output_dir, download_dir, self.analysis.name)
         zip_pack_file = os.path.join(download_dir, f'{self.analysis.name}_pack.zip')
         zip_pack = File(open(zip_pack_file, 'rb'))
@@ -30,13 +28,11 @@ class DataScienceExecute():
         if os.path.exists(zip_pack_file):
             os.remove(zip_pack_file)
 
-
     @staticmethod
     def create_dirs(*dirs):
         for dir in dirs:
             if not os.path.exists(dir):
                 os.mkdir(dir)
-
 
     @staticmethod
     def packing_zip(from_dir, to_dir, name_zip):
