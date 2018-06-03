@@ -1,7 +1,6 @@
 import os
 from django.core.files import File
 from rest_framework.response import Response
-
 from data_science_app.serializers import UserSerializer, AnalysisSerializer
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from data_science_app.permissions import IsOwnerOrReadOnly
@@ -9,7 +8,6 @@ from django.shortcuts import redirect, get_object_or_404
 from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import PermissionDenied
 from rest_framework import viewsets, permissions, status
-from django.conf import settings
 from data_science_app.forms import UserFormEdit
 from django.http import HttpResponse, Http404
 from rest_framework.decorators import action
@@ -70,12 +68,16 @@ class Details(generic.DetailView):
 
     def get_object(self, queryset=None):
         obj = super(Details, self).get_object(queryset=queryset)
-        return obj
+        if obj is not None:
+            if self.request.user == obj.user:
+                return obj
+            else:
+                raise PermissionDenied
+        return Http404
 
     def get_queryset(self):
         queryset = super(Details, self).get_queryset()
         return queryset.filter(user=self.request.user)
-
 
 class NewAnalysis(generic.CreateView):
     template_name = "new_analysis.html"
@@ -97,7 +99,12 @@ class EditAnalysis(generic.UpdateView):
 
     def get_object(self, queryset=None):
         obj = super(EditAnalysis, self).get_object(queryset=queryset)
-        return obj or Http404
+        if obj is not None:
+            if self.request.user == obj.user:
+                return obj
+            else:
+                raise PermissionDenied
+        return Http404
 
     def get_queryset(self):
         queryset = super(EditAnalysis, self).get_queryset()
@@ -111,7 +118,12 @@ class DeleteAnalysis(generic.DeleteView):
 
     def get_object(self, queryset=None):
         obj = super(DeleteAnalysis, self).get_object(queryset=queryset)
-        return obj
+        if obj is not None:
+            if self.request.user == obj.user:
+                return obj
+            else:
+                raise PermissionDenied
+        return Http404
 
     def get_queryset(self):
         queryset = super(DeleteAnalysis, self).get_queryset()
@@ -170,6 +182,8 @@ class DownloadZip(generic.View):
                     response = HttpResponse(analysis.file_zip)
                     response["Content-Disposition"] = 'attachment; filename="{}.zip"'.format(analysis.name)
                     return response
+                else:
+                    return Http404
             else:
                 raise PermissionDenied
         except:
