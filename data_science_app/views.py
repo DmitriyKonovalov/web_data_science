@@ -4,6 +4,8 @@ from django.contrib.auth.forms import UserCreationForm
 from rest_framework import viewsets, mixins, generics
 from rest_framework.views import APIView
 from rest_framework import permissions
+from rest_framework.decorators import action
+from rest_framework.response import Response
 from data_science_app.permissions import IsOwnerOrReadOnly
 from data_science_app.serializers import UserSerializer, AnalysisSerializer
 from django.core.exceptions import PermissionDenied
@@ -226,26 +228,16 @@ class DownloadZip(generic.View):
 # todo desktop.html Если файла с таблицей нет, то кнопка с расчетами (выбрать, недоступна, и тд)
 
 
-class AnalysisList(generics.ListCreateAPIView):
-    queryset = Analysis.objects.all()
-    serializer_class = AnalysisSerializer
-
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
-
-
-class AnalysisDetail(generics.RetrieveUpdateDestroyAPIView):
+class AnalysisViewSet(viewsets.ModelViewSet):
     queryset = Analysis.objects.all()
     serializer_class = AnalysisSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,
                           IsOwnerOrReadOnly,)
 
-
-class UserList(generics.ListCreateAPIView):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
 
 
-class UserDetail(generics.RetrieveUpdateDestroyAPIView):
+class UserViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer

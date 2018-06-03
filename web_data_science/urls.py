@@ -64,8 +64,8 @@ urlpatterns = [
                   # url(r'^analyses/$', views.analysis_list),
                   # url(r'^analyses/(?P<pk>[0-9]+)$', views.analysis_detail),
 
-                  path('analyses/', views.AnalysisList.as_view()),
-                  path('analyses/<int:pk>/', views.AnalysisDetail.as_view()),
+                  path('analyses/', views.AnalysisList.as_view(), name='analysis-list'),
+                  path('analyses/<int:pk>/', views.AnalysisDetail.as_view(), name='analysis-detail'),
                   path('users/', views.AnalysisList.as_view()),
                   path('users/<int:pk>/', views.AnalysisDetail.as_view()),
               ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
