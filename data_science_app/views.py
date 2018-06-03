@@ -3,7 +3,8 @@ import shutil
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth import authenticate, login
+from rest_framework import viewsets
+from data_science_app.serializers import UserSerializer, AnalysisSerializer
 from django.core.exceptions import PermissionDenied
 from data_science_app.forms import UserFormEdit
 from data_science_app.models import Analysis
@@ -217,3 +218,13 @@ class DownloadZip(generic.View):
                 raise PermissionDenied
         except:
             raise Http404
+
+
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all().order_by('id')
+    serializer_class = UserSerializer
+
+
+class AnalysesViewSet(viewsets.ModelViewSet):
+    queryset = Analysis.objects.all()
+    serializer_class = AnalysisSerializer

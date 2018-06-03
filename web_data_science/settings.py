@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'data_science_app',
     'bootstrap3',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
