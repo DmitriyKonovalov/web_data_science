@@ -18,16 +18,17 @@ from django.contrib.auth import views as auth_views
 from django.conf.urls.static import static
 from data_science_app import views, api
 from django.conf.urls import include, url
-from rest_framework import routers
+# ?? зачем это для request/response from rest_framework.urlpatterns import format_suffix_patterns
+#from rest_framework import routers
 from django.conf import settings
 from django.contrib import admin
 from django.urls import path
 
 DEFAULT_LOGIN_URL = '/sign_in'
 
-router = routers.DefaultRouter()
-router.register('api/users', views.UserViewSet)
-router.register('api/analyses', views.AnalysesViewSet)
+# router = routers.DefaultRouter()
+# router.register('api/users', views.UserViewSet)
+# router.register('api/analyses', views.AnalysesViewSet)
 
 urlpatterns = [
                   path('admin/', admin.site.urls),
@@ -53,9 +54,11 @@ urlpatterns = [
                        login_required(views.AnalysisExecute.as_view(), login_url=DEFAULT_LOGIN_URL), name='execute'),
                   path('desktop/<int:pk>/download',
                        login_required(views.DownloadZip.as_view(), login_url=DEFAULT_LOGIN_URL), name='download'),
-                  path('', include(router.urls)),
-                  #path('api/client/analyses', api.client_get_analysis),
-                  #path('api/client/users', api.client_get_users),
-                  path('api-auth/', include('rest_framework.urls', namespace='rest_framework'))
-
+                  # path('', include(router.urls)),
+                  # path('api/client/analyses', api.client_get_analysis),
+                  # path('api/client/users', api.client_get_users),
+                  # path('api-auth/', include('rest_framework.urls', namespace='rest_framework'))
+                  url(r'^analyses/$', views.AnalysisList),
+                  #url(r'^analyses/$', views.analysis_list),
+                  url(r'^analyses/(?P<pk>[0-9]+)$', views.analysis_detail),
               ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
