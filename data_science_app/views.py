@@ -2,6 +2,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.forms import UserCreationForm
 from rest_framework import viewsets, mixins, generics
+from rest_framework.reverse import reverse
 from rest_framework.views import APIView
 from rest_framework import permissions
 from rest_framework.decorators import action
@@ -227,6 +228,11 @@ class DownloadZip(generic.View):
 
 # todo desktop.html Если файла с таблицей нет, то кнопка с расчетами (выбрать, недоступна, и тд)
 
+@api_view(['GET'])
+def api_root(request, format=None):
+    return Response({'users': reverse('user-list', request=request, format=format),
+                     'snippets': reverse('snippet-list', request=request, format=format)})
+
 
 class AnalysisViewSet(viewsets.ModelViewSet):
     queryset = Analysis.objects.all()
@@ -235,7 +241,7 @@ class AnalysisViewSet(viewsets.ModelViewSet):
                           IsOwnerOrReadOnly,)
 
     def perform_create(self, serializer):
-        serializer.save(owner=self.request.user)
+        serializer.save(user=self.request.user)
 
 
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
