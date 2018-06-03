@@ -16,21 +16,14 @@ Including another URLconf
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import views as auth_views
 from django.conf.urls.static import static
-from rest_framework.urlpatterns import format_suffix_patterns
-
-from data_science_app import views, api
-from django.conf.urls import include, url
-# ?? зачем это для request/response from rest_framework.urlpatterns import format_suffix_patterns
-# from rest_framework import routers
+from data_science_app import views
+from django.conf.urls import include
 from django.conf import settings
 from django.contrib import admin
 from django.urls import path
+from rest_framework import routers
 
 DEFAULT_LOGIN_URL = '/sign_in'
-
-from data_science_app.views import AnalysisViewSet, UserViewSet
-from rest_framework import renderers, routers
-from rest_framework.routers import DefaultRouter
 
 router = routers.DefaultRouter()
 router.register('api/users', views.UserViewSet)

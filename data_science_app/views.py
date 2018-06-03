@@ -1,7 +1,7 @@
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.forms import UserCreationForm
-from rest_framework import viewsets, mixins, generics
+from rest_framework import viewsets, mixins, generics, renderers
 from rest_framework.reverse import reverse
 from rest_framework.views import APIView
 from rest_framework import permissions
@@ -134,31 +134,29 @@ class AnalysisExecute(generic.RedirectView):
     def get(self, request, *args, **kwargs):
         analysis = Analysis.objects.get(id=kwargs['pk'])
         if analysis.user == request.user:
-            output_dir = os.path.join(settings.MEDIA_ROOT, analysis.name)
-            download_dir = os.path.join(settings.MEDIA_ROOT, "downloads")
-
-            self.create_dirs(output_dir, download_dir)
-
-            analysis_dict = analysis.__dict__
-            analysis_dict['file_data'] = analysis.file_data.path
-
-            ds_runner = DataScienceRun(analysis_dict, output_dir)
-            ds_runner.data_science_execute()
-
-            self.packing_zip(output_dir, download_dir, analysis.name)
-            zip_pack_file = os.path.join(download_dir, f'{analysis.name}_pack.zip')
-
-            zip_pack = File(open(zip_pack_file, 'rb'))
-            analysis.file_zip.save(f'{analysis.name}.zip', zip_pack, save=True)
-            zip_pack.close()
-
-            shutil.rmtree(os.path.join(settings.MEDIA_ROOT, analysis.name))
-
-            if os.path.exists(zip_pack_file):
-                os.remove(zip_pack_file)
+            self.execute(analysis)
             return redirect(reverse_lazy('desktop'))
         else:
             raise PermissionDenied
+
+    def execute(self,analysis):
+        output_dir = os.path.join(settings.MEDIA_ROOT, analysis.name)
+        download_dir = os.path.join(settings.MEDIA_ROOT, "downloads")
+        self.create_dirs(output_dir, download_dir)
+        analysis_dict = analysis.__dict__
+        analysis_dict['file_data'] = analysis.file_data.path
+
+        ds_runner = DataScienceRun(analysis_dict, output_dir)
+        ds_runner.data_science_execute()
+
+        self.packing_zip(output_dir, download_dir, analysis.name)
+        zip_pack_file = os.path.join(download_dir, f'{analysis.name}_pack.zip')
+        zip_pack = File(open(zip_pack_file, 'rb'))
+        analysis.file_zip.save(f'{analysis.name}.zip', zip_pack, save=True)
+        zip_pack.close()
+        shutil.rmtree(os.path.join(settings.MEDIA_ROOT, analysis.name))
+        if os.path.exists(zip_pack_file):
+            os.remove(zip_pack_file)
 
     @staticmethod
     def create_dirs(*dirs):
@@ -226,19 +224,24 @@ class DownloadZip(generic.View):
             raise Http404
 
 
-# todo desktop.html Если файла с таблицей нет, то кнопка с расчетами (выбрать, недоступна, и тд)
-
-@api_view(['GET'])
-def api_root(request, format=None):
-    return Response({'users': reverse('user-list', request=request, format=format),
-                     'snippets': reverse('snippet-list', request=request, format=format)})
-
-
 class AnalysisViewSet(viewsets.ModelViewSet):
     queryset = Analysis.objects.all()
     serializer_class = AnalysisSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,
                           IsOwnerOrReadOnly,)
+
+    @action(detail=True)
+    def execute(self, request, *args, **kwargs):
+        pass
+
+    @action(detail=True)
+    def download(self, request, *args, **kwargs):
+        analysis = self.get_object()
+        if analysis.file_zip != "":
+            response = HttpResponse(analysis.file_zip)
+            response["Content-Disposition"] = 'attachment; filename="{}.zip"'.format(analysis.name)
+            return response
+        raise Http404
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
