@@ -16,10 +16,12 @@ Including another URLconf
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import views as auth_views
 from django.conf.urls.static import static
+from rest_framework.urlpatterns import format_suffix_patterns
+
 from data_science_app import views, api
 from django.conf.urls import include, url
 # ?? зачем это для request/response from rest_framework.urlpatterns import format_suffix_patterns
-#from rest_framework import routers
+# from rest_framework import routers
 from django.conf import settings
 from django.contrib import admin
 from django.urls import path
@@ -58,7 +60,11 @@ urlpatterns = [
                   # path('api/client/analyses', api.client_get_analysis),
                   # path('api/client/users', api.client_get_users),
                   # path('api-auth/', include('rest_framework.urls', namespace='rest_framework'))
-                  url(r'^analyses/$', views.AnalysisList),
-                  #url(r'^analyses/$', views.analysis_list),
-                  url(r'^analyses/(?P<pk>[0-9]+)$', views.analysis_detail),
+
+                  # url(r'^analyses/$', views.analysis_list),
+                  # url(r'^analyses/(?P<pk>[0-9]+)$', views.analysis_detail),
+
+                  path('analyses/', views.AnalysisList.as_view()),
+                  path('analyses/<int:pk>/', views.AnalysisDetail.as_view()),
               ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+urlpatterns = format_suffix_patterns(urlpatterns)

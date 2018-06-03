@@ -1,7 +1,7 @@
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.forms import UserCreationForm
-from rest_framework import viewsets
+from rest_framework import viewsets, mixins, generics
 from rest_framework.views import APIView
 
 from data_science_app.serializers import UserSerializer, AnalysisSerializer
@@ -226,31 +226,42 @@ class DownloadZip(generic.View):
             raise Http404
 
 
-class UserViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all().order_by('id')
-    serializer_class = UserSerializer
+#class UserViewSet(viewsets.ModelViewSet):
+#    queryset = User.objects.all().order_by('id')
+#    serializer_class = UserSerializer
 
 
-class AnalysesViewSet(viewsets.ModelViewSet):
+#class AnalysesViewSet(viewsets.ModelViewSet):
+#    queryset = Analysis.objects.all()
+#    serializer_class = AnalysisSerializer
+
+
+class AnalysisList(mixins.ListModelMixin,
+                  mixins.CreateModelMixin,generics.GenericAPIView):
     queryset = Analysis.objects.all()
     serializer_class = AnalysisSerializer
 
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
 
-class AnalysisList(APIView):
-    def get(self, request):
-        analyses = Analysis.objects.all()
-        serializer = AnalysisSerializer(analyses, many=True)
-        return Response(serializer.data)
+    def post(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)
+    #def get(self, request, format=None):
+    #    analyses = Analysis.objects.all()
+    #    serializer = AnalysisSerializer(analyses, many=True)
+    #    return Response(serializer.data)
 
-    def post(self, request):
-        serializer = AnalysisSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    #def post(self, request, format=None):
+    #    serializer = AnalysisSerializer(data=request.data)
+    #    if serializer.is_valid():
+    #        serializer.save()
+    #        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    #    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+class AnalysisDetail(APIView):
+    queryset = Analysis.objects.all()
+    serializer_class = AnalysisSerializer
 
-class SnippetDetail(APIView):
     def get_object(self, pk):
         try:
             return Analysis.objects.get(pk=pk)
@@ -272,42 +283,5 @@ class SnippetDetail(APIView):
 
     def delete(self, request, pk, format=None):
         analysis = self.get_object(pk)
-        analysis.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-@api_view(['GET', 'POST'])
-def analysis_list(request):
-    if request.method == 'GET':
-        analyses = Analysis.objects.all()
-        serializer = AnalysisSerializer(analyses, many=True)
-        return Response(serializer.data)
-
-    elif request.method == 'POST':
-        serializer = AnalysisSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-@api_view(['GET', 'PUT', 'DELETE'])
-def analysis_detail(request, pk):
-    try:
-        analysis = Analysis.objects.get(pk=pk)
-    except:
-        return Response(status=status.HTTP_404_NOT_FOUND)
-
-    if request.method == 'GET':
-        serializer = AnalysisSerializer(analysis)
-        return Response(serializer.data)
-
-    elif request.method == 'PUT':
-        serializer = AnalysisSerializer(analysis, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    elif request.method == 'DELETE':
         analysis.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
