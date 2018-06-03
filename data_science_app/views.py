@@ -1,34 +1,21 @@
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.forms import UserCreationForm
-from rest_framework import viewsets, mixins, generics, renderers
-from rest_framework.reverse import reverse
-from rest_framework.views import APIView
-from rest_framework import permissions
-from rest_framework.decorators import action
 from rest_framework.response import Response
-from data_science_app.permissions import IsOwnerOrReadOnly
+
 from data_science_app.serializers import UserSerializer, AnalysisSerializer
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from data_science_app.permissions import IsOwnerOrReadOnly
+from django.shortcuts import redirect, get_object_or_404
+from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import PermissionDenied
+from rest_framework import viewsets, permissions, status
 from data_science_app.forms import UserFormEdit
+from django.http import HttpResponse, Http404
+from rest_framework.decorators import action
 from data_science_app.models import Analysis
-from ds_class.ds_class import DataScienceRun
 from django.contrib.auth.models import User
-from django.views import View, generic
-from django.http import HttpResponse
+from ds_class.ds_execute import DataScienceExecute
 from django.urls import reverse_lazy
-from django.core.files import File
-from django.conf import settings
+from django.views import generic
 from django.db.models import Q
-from django.http import Http404
-import zipfile
-import shutil
-import os
-
-from rest_framework import status
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
-
 PAGINATION_PAGES = 4
 
 
@@ -134,50 +121,11 @@ class AnalysisExecute(generic.RedirectView):
     def get(self, request, *args, **kwargs):
         analysis = Analysis.objects.get(id=kwargs['pk'])
         if analysis.user == request.user:
-            self.execute(analysis)
+            execute = DataScienceExecute(analysis)
+            execute.execute()
             return redirect(reverse_lazy('desktop'))
         else:
             raise PermissionDenied
-
-    def execute(self,analysis):
-        output_dir = os.path.join(settings.MEDIA_ROOT, analysis.name)
-        download_dir = os.path.join(settings.MEDIA_ROOT, "downloads")
-        self.create_dirs(output_dir, download_dir)
-        analysis_dict = analysis.__dict__
-        analysis_dict['file_data'] = analysis.file_data.path
-
-        ds_runner = DataScienceRun(analysis_dict, output_dir)
-        ds_runner.data_science_execute()
-
-        self.packing_zip(output_dir, download_dir, analysis.name)
-        zip_pack_file = os.path.join(download_dir, f'{analysis.name}_pack.zip')
-        zip_pack = File(open(zip_pack_file, 'rb'))
-        analysis.file_zip.save(f'{analysis.name}.zip', zip_pack, save=True)
-        zip_pack.close()
-        shutil.rmtree(os.path.join(settings.MEDIA_ROOT, analysis.name))
-        if os.path.exists(zip_pack_file):
-            os.remove(zip_pack_file)
-
-    @staticmethod
-    def create_dirs(*dirs):
-        for dir in dirs:
-            if not os.path.exists(dir):
-                os.mkdir(dir)
-
-    @staticmethod
-    def packing_zip(from_dir, to_dir, name_zip):
-        if os.path.exists(os.path.join(to_dir, f'{name_zip}.zip')):
-            os.remove(os.path.join(to_dir, f'{name_zip}.zip'))
-        if os.path.exists(os.path.join(to_dir, f'{name_zip}_pack.zip')):
-            os.remove(os.path.join(to_dir, f'{name_zip}_pack.zip'))
-
-        file_name = os.path.join(to_dir, f'{name_zip}_pack.zip')
-        zip_archive = zipfile.ZipFile(file_name, "w")
-        for file in os.listdir(from_dir):
-            print(os.path.join(from_dir, file))
-            zip_archive.write(os.path.join(from_dir, file), file)
-        zip_archive.close()
-        return zip_archive
 
 
 class SearchView(generic.ListView):
@@ -232,16 +180,26 @@ class AnalysisViewSet(viewsets.ModelViewSet):
 
     @action(detail=True)
     def execute(self, request, *args, **kwargs):
-        pass
+        analysis = self.get_object()
+        if request.user == analysis.user:
+            try:
+                execute = DataScienceExecute(analysis)
+                execute.execute()
+                return Response({}, status=status.HTTP_200_OK)
+            except:
+                raise Http404
+        raise PermissionDenied
 
     @action(detail=True)
     def download(self, request, *args, **kwargs):
         analysis = self.get_object()
-        if analysis.file_zip != "":
-            response = HttpResponse(analysis.file_zip)
-            response["Content-Disposition"] = 'attachment; filename="{}.zip"'.format(analysis.name)
-            return response
-        raise Http404
+        if request.user == analysis.user:
+            if analysis.file_zip != "":
+                response = HttpResponse(analysis.file_zip)
+                response["Content-Disposition"] = 'attachment; filename="{}.zip"'.format(analysis.name)
+                return response
+            raise Http404
+        raise PermissionDenied
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
