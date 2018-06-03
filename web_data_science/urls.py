@@ -32,14 +32,7 @@ from data_science_app.views import AnalysisViewSet, UserViewSet
 from rest_framework import renderers, routers
 from rest_framework.routers import DefaultRouter
 
-analysis_list = AnalysisViewSet.as_view({'get': 'list', 'post': 'create'})
-analysis_detail = AnalysisViewSet.as_view(
-    {'get': 'retrieve', 'put': 'update', 'patch': 'partial_update', 'delete': 'destroy'})
-
-user_list = UserViewSet.as_view({'get': 'list'})
-user_detail = UserViewSet.as_view({'get': 'retrieve'})
-
-router = DefaultRouter()
+router = routers.DefaultRouter()
 router.register('api/users', views.UserViewSet)
 router.register('api/analyses', views.AnalysisViewSet)
 
@@ -68,18 +61,5 @@ urlpatterns = [
                   path('desktop/<int:pk>/download',
                        login_required(views.DownloadZip.as_view(), login_url=DEFAULT_LOGIN_URL), name='download'),
 
-                  # path('api/client/analyses', api.client_get_analysis),
-                  # path('api/client/users', api.client_get_users),
-                  # path('api-auth/', include('rest_framework.urls', namespace='rest_framework'))
-
-                  # url(r'^analyses/$', views.analysis_list),
-                  # url(r'^analyses/(?P<pk>[0-9]+)$', views.analysis_detail),
-                  path('', views.api_root),
-                  #path('', include(router.urls)),
-                  path('analyses/', analysis_list, name='analysis-list'),
-                  path('analyses/<int:pk>/', analysis_detail, name='analysis-detail'),
-                  path('users/', user_list, name='user-list'),
-                  path('users/<int:pk>/', user_detail, name='user-detail'),
+                  path('', include(router.urls)),
               ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-
-urlpatterns = format_suffix_patterns(urlpatterns)
