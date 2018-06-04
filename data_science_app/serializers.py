@@ -1,5 +1,6 @@
-from data_science_app.models import Analysis, User
 from rest_framework import serializers
+
+from data_science_app.models import Analysis, User
 
 
 class AnalysisSerializer(serializers.HyperlinkedModelSerializer):

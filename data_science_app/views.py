@@ -68,7 +68,6 @@ class Desktop(generic.ListView):
         return context
 
 
-
 class Details(generic.DetailView):
     template_name = "details.html"
     model = Analysis

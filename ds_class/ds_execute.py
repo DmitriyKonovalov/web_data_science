@@ -1,9 +1,11 @@
-from ds_class.ds_class import DataScienceRun
-from django.core.files import File
-from django.conf import settings
-import zipfile
-import shutil
 import os
+import shutil
+import zipfile
+
+from django.conf import settings
+from django.core.files import File
+
+from ds_class.ds_class import DataScienceRun
 
 
 class WebDataScienceExecute():

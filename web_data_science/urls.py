@@ -14,15 +14,15 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
-from django.conf.urls.static import static
-from data_science_app import views
-from django.conf.urls import include
 from django.conf import settings
+from django.conf.urls import include
+from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path
-from rest_framework.authtoken import views as rest_views
 from rest_framework import routers
+from rest_framework.authtoken import views as rest_views
 
+from data_science_app import views
 
 router = routers.DefaultRouter()
 router.register('api/users', views.UserViewSet)
