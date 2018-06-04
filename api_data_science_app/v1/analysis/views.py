@@ -16,8 +16,8 @@ from ds_class.ds_execute import WebDataScienceExecute
 
 
 class AnalysisViewSet(viewsets.ModelViewSet):
-    authentication_classes = (TokenAuthentication)
-    #authentication_classes = (SessionAuthentication, BasicAuthentication)
+    #authentication_classes = (TokenAuthentication)
+    authentication_classes = (SessionAuthentication, BasicAuthentication)
     queryset = Analysis.objects.all()
     serializer_class = AnalysisSerializer
     permission_classes = (IsAuthenticated, IsOwnerOrReadOnly,)
