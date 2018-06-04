@@ -1,30 +1,29 @@
-import os
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.models import User
+from django.core.exceptions import PermissionDenied
 from django.core.files import File
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.db.models import Q
+from django.http import HttpResponse, Http404
+from django.shortcuts import redirect, get_object_or_404
+from django.urls import reverse_lazy
+from django.views import generic
 from requests_oauthlib.oauth1_auth import unicode
-from rest_framework.authentication import BasicAuthentication, SessionAuthentication
+from rest_framework import viewsets, status
+from rest_framework.authentication import BasicAuthentication, SessionAuthentication, TokenAuthentication
+from rest_framework.authtoken.models import Token
+from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from data_science_app.serializers import UserSerializer, AnalysisSerializer
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from data_science_app.permissions import IsOwnerOrReadOnly
-from django.shortcuts import redirect, get_object_or_404
-from django.contrib.auth.forms import UserCreationForm
-from django.core.exceptions import PermissionDenied
-from rest_framework import viewsets, permissions, status
 from data_science_app.forms import UserFormEdit
-from django.http import HttpResponse, Http404
-from rest_framework.decorators import action
 from data_science_app.models import Analysis
-from django.contrib.auth.models import User
+from data_science_app.permissions import IsOwnerOrReadOnly
+from data_science_app.serializers import UserSerializer, AnalysisSerializer
 from ds_class.ds_execute import WebDataScienceExecute
-from django.urls import reverse_lazy
-from rest_framework.authtoken.models import Token
-from django.views import generic
-from django.db.models import Q
 
-PAGINATION_PAGES = 4
+PAGINATION_PAGES = 2
 
 
 class SignUp(generic.CreateView):
@@ -52,6 +51,7 @@ class Desktop(generic.ListView):
 
     def get_queryset(self):
         queryset = super(Desktop, self).get_queryset()
+
         paginator = Paginator(queryset.filter(user=self.request.user), PAGINATION_PAGES)
         page = self.request.GET.get('page')
         try:
@@ -62,10 +62,11 @@ class Desktop(generic.ListView):
             analyses = paginator.page(paginator.num_pages)
         return analyses
 
-    def get_context_data(self, *, object_list=None, **kwargs):
-        context = {}
+    def get_context_data(self, object_list=None, **kwargs):
+        context = super(Desktop, self).get_context_data()
         context['analyses'] = self.get_queryset()
         return context
+
 
 
 class Details(generic.DetailView):
@@ -73,13 +74,8 @@ class Details(generic.DetailView):
     model = Analysis
 
     def get_object(self, queryset=None):
-        obj = super(Details, self).get_object(queryset=queryset)
-        if obj is not None:
-            if self.request.user == obj.user:
-                return obj
-            else:
-                raise PermissionDenied
-        return Http404
+        obj = get_object_or_404(Analysis, pk=self.kwargs['pk'])
+        return obj
 
     def get_queryset(self):
         queryset = super(Details, self).get_queryset()
@@ -105,13 +101,8 @@ class EditAnalysis(generic.UpdateView):
     success_url = reverse_lazy('desktop')
 
     def get_object(self, queryset=None):
-        obj = super(EditAnalysis, self).get_object(queryset=queryset)
-        if obj is not None:
-            if self.request.user == obj.user:
-                return obj
-            else:
-                raise PermissionDenied
-        return Http404
+        obj = get_object_or_404(Analysis, pk=self.kwargs['pk'])
+        return obj
 
     def get_queryset(self):
         queryset = super(EditAnalysis, self).get_queryset()
@@ -124,13 +115,8 @@ class DeleteAnalysis(generic.DeleteView):
     success_url = reverse_lazy('desktop')
 
     def get_object(self, queryset=None):
-        obj = super(DeleteAnalysis, self).get_object(queryset=queryset)
-        if obj is not None:
-            if self.request.user == obj.user:
-                return obj
-            else:
-                raise PermissionDenied
-        return Http404
+        obj = get_object_or_404(Analysis, pk=self.kwargs['pk'])
+        return obj
 
     def get_queryset(self):
         queryset = super(DeleteAnalysis, self).get_queryset()
@@ -154,16 +140,8 @@ class AnalysisExecute(generic.RedirectView):
 class SearchView(generic.ListView):
     template_name = "search.html"
 
-    @staticmethod
-    def create_token_for_exists_users():
-        for user in User.objects.all():
-            Token.objects.get_or_create(user=user)
-            print(user, Token)
-
     def get_queryset(self):
         query = self.request.GET.get('q')
-        if query == "get_token":
-            self.create_token_for_exists_users()
         founded = Analysis.objects.filter((Q(name__icontains=query) | Q(ws__icontains=query) | Q(
             wd__icontains=query) | Q(date_create__icontains=query) | Q(date_modified__icontains=query)) & Q(
             user=self.request.user))
@@ -178,8 +156,8 @@ class SearchView(generic.ListView):
             founded = paginator.page(paginator.num_pages)
         return founded
 
-    def get_context_data(self, *, object_list=None, **kwargs):
-        context = {}
+    def get_context_data(self, object_list=None, **kwargs):
+        context = super(SearchView, self).get_context_data()
         query = self.request.GET.get('q')
         context['last_query'] = query
         context['user'] = self.request.user
@@ -190,26 +168,23 @@ class SearchView(generic.ListView):
 class DownloadZip(generic.View):
 
     def get(self, request, *args, **kwargs):
-        try:
-            analysis = get_object_or_404(Analysis, pk=kwargs['pk'])
-            if analysis.user == request.user:
-                if analysis.file_zip != "":
-                    response = HttpResponse(analysis.file_zip)
-                    response["Content-Disposition"] = 'attachment; filename="{}.zip"'.format(analysis.name)
-                    return response
-                else:
-                    return Http404
+        analysis = get_object_or_404(Analysis, pk=kwargs['pk'])
+        if analysis.user == request.user:
+            if analysis.file_zip != "":
+                response = HttpResponse(analysis.file_zip)
+                response["Content-Disposition"] = 'attachment; filename="{}.zip"'.format(analysis.name)
+                return response
             else:
-                raise PermissionDenied
-        except:
-            raise Http404
+                return Http404
+        else:
+            raise PermissionDenied
 
 
 class AnalysisViewSet(viewsets.ModelViewSet):
     authentication_classes = (SessionAuthentication, BasicAuthentication)
     queryset = Analysis.objects.all()
     serializer_class = AnalysisSerializer
-    permission_classes = (IsAuthenticated,IsOwnerOrReadOnly,)
+    permission_classes = (IsAuthenticated, IsOwnerOrReadOnly,)
 
     @action(detail=True)
     def execute(self, request, *args, **kwargs):
@@ -230,7 +205,7 @@ class AnalysisViewSet(viewsets.ModelViewSet):
             try:
                 file_name = request.data['file_path']
                 file_data = File(open(file_name, 'r'))
-                analysis.file_data.save (f'{analysis.name}.csv', file_data, save=True)
+                analysis.file_data.save(f'{analysis.name}.csv', file_data, save=True)
                 file_data.close()
                 return Response({}, status=status.HTTP_200_OK)
             except:
@@ -272,8 +247,9 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
         }
         return Response(content)
 
+
 class ExampleView(APIView):
-    authentication_classes = (SessionAuthentication, BasicAuthentication)
+    authentication_classes = (TokenAuthentication)
     permission_classes = (IsAuthenticated,)
 
     def get(self, request, format=None):
@@ -282,3 +258,9 @@ class ExampleView(APIView):
             'auth': unicode(request.auth),  # None
         }
         return Response(content)
+
+
+def create_token_for_exists_users():
+    for user in User.objects.all():
+        Token.objects.get_or_create(user=user)
+        print(user, Token)
