@@ -180,7 +180,8 @@ class DownloadZip(generic.View):
 
 
 class AnalysisViewSet(viewsets.ModelViewSet):
-    authentication_classes = (SessionAuthentication, BasicAuthentication)
+    authentication_classes = (TokenAuthentication)
+    #authentication_classes = (SessionAuthentication, BasicAuthentication)
     queryset = Analysis.objects.all()
     serializer_class = AnalysisSerializer
     permission_classes = (IsAuthenticated, IsOwnerOrReadOnly,)
@@ -225,38 +226,12 @@ class AnalysisViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
-    def get(self, request, format=None):
-        content = {
-            'user': unicode(request.user),  # `django.contrib.auth.User` instance.
-            'auth': unicode(request.auth),  # None
-        }
-        return Response(content)
-
 
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
     authentication_classes = (SessionAuthentication, BasicAuthentication)
     permission_classes = (IsAuthenticated,)
     queryset = User.objects.all()
     serializer_class = UserSerializer
-
-    def get(self, request, format=None):
-        content = {
-            'user': unicode(request.user),  # `django.contrib.auth.User` instance.
-            'auth': unicode(request.auth),  # None
-        }
-        return Response(content)
-
-
-class ExampleView(APIView):
-    authentication_classes = (TokenAuthentication)
-    permission_classes = (IsAuthenticated,)
-
-    def get(self, request, format=None):
-        content = {
-            'user': unicode(request.user),  # `django.contrib.auth.User` instance.
-            'auth': unicode(request.auth),  # None
-        }
-        return Response(content)
 
 
 def create_token_for_exists_users():
