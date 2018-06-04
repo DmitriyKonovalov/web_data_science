@@ -19,18 +19,8 @@ from django.conf.urls import include
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path
-from rest_framework import routers
-from rest_framework.authtoken import views as rest_views
-
-from data_science_app import views
-
-router = routers.DefaultRouter()
-router.register('api/users', views.UserViewSet)
-router.register('api/analyses', views.AnalysisViewSet)
-
 urlpatterns = [
                   path('admin/', admin.site.urls),
                   path('', include("data_science_app.urls")),
-                  path('', include(router.urls)),
-                  path('token-auth/', rest_views.obtain_auth_token),
+                  path('api/', include('api_data_science_app.urls')),
               ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
