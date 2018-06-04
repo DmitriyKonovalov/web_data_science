@@ -2,8 +2,8 @@
 from django.http import Http404, HttpResponse
 from rest_framework.exceptions import PermissionDenied
 from data_science_app.models import Analysis
-from data_science_app.permissions import IsOwnerOrReadOnly
-from data_science_app.serializers import UserSerializer, AnalysisSerializer
+from api_data_science_app.v1.analysis.permissions import IsOwnerOrReadOnly
+from api_data_science_app.v1.analysis.serializers import AnalysisSerializer
 from django.core.files import File
 from rest_framework import viewsets, status
 from rest_framework.authentication import BasicAuthentication, SessionAuthentication, TokenAuthentication
