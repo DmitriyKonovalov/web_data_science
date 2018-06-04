@@ -1,4 +1,4 @@
-from django.contrib.auth.models import User
+
 from django.http import Http404, HttpResponse
 from rest_framework.exceptions import PermissionDenied
 from data_science_app.models import Analysis
@@ -7,7 +7,7 @@ from data_science_app.serializers import UserSerializer, AnalysisSerializer
 from django.core.files import File
 from rest_framework import viewsets, status
 from rest_framework.authentication import BasicAuthentication, SessionAuthentication, TokenAuthentication
-from rest_framework.authtoken.models import Token
+
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -63,14 +63,3 @@ class AnalysisViewSet(viewsets.ModelViewSet):
         serializer.save(user=self.request.user)
 
 
-class UserViewSet(viewsets.ReadOnlyModelViewSet):
-    authentication_classes = (SessionAuthentication, BasicAuthentication)
-    permission_classes = (IsAuthenticated,)
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-
-
-def create_token_for_exists_users():
-    for user in User.objects.all():
-        Token.objects.get_or_create(user=user)
-        print(user, Token)
