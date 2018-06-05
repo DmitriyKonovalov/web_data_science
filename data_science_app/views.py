@@ -7,6 +7,7 @@ from django.http import HttpResponse, Http404
 from django.shortcuts import redirect, get_object_or_404
 from django.urls import reverse_lazy
 from django.views import generic
+
 from data_science_app.forms import UserFormEdit
 from data_science_app.models import Analysis
 from ds_class.ds_execute import WebDataScienceExecute

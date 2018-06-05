@@ -6,7 +6,6 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from api_data_science_app.v1.analysis.permissions import IsOwnerOrReadOnly
 from api_data_science_app.v1.analysis.serializers import AnalysisSerializer
 from data_science_app.models import Analysis
 from ds_class.ds_execute import WebDataScienceExecute
@@ -15,7 +14,11 @@ from ds_class.ds_execute import WebDataScienceExecute
 class AnalysisViewSet(viewsets.ModelViewSet):
     queryset = Analysis.objects.all()
     serializer_class = AnalysisSerializer
-    permission_classes = (IsAuthenticated, IsOwnerOrReadOnly,)
+    permission_classes = (IsAuthenticated,)
+
+    def get_queryset(self):
+        queryset = super(AnalysisViewSet, self).get_queryset()
+        return queryset.filter(user=self.request.user)
 
     @action(methods=['post'], detail=True)
     def execute(self, request, *args, **kwargs):

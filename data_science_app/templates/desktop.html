@@ -56,25 +56,25 @@
         {% endfor %}
         </tbody>
     </table>
-        <div class="pagination">
+    <div class="pagination">
 
-    {% if analyses.has_previous %}
+        {% if analyses.has_previous %}
         <a href="?page={{ analyses.previous_page_number }}">←</a>
-    {% endif %}
-
-    {% for num in analyses.paginator.page_range %}
-        {% if num == analyses.number %}
-            <span class="current"><b>{{ num }}</b></span>
-        {% else %}
-            <a href="?page={{ num }}"> {{ num }}</a>
         {% endif %}
-    {% endfor %}
 
-    {% if analyses.has_next %}
+        {% for num in analyses.paginator.page_range %}
+        {% if num == analyses.number %}
+        <span class="current"><b>{{ num }}</b></span>
+        {% else %}
+        <a href="?page={{ num }}"> {{ num }}</a>
+        {% endif %}
+        {% endfor %}
+
+        {% if analyses.has_next %}
         <a href="?page={{ analyses.next_page_number }}">→</a>
-    {% endif %}
+        {% endif %}
 
-</div>
+    </div>
 
     <br/>
 </div>
