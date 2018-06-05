@@ -1,28 +1,23 @@
-
-from django.http import Http404, HttpResponse
-from rest_framework.exceptions import PermissionDenied
-from data_science_app.models import Analysis
-from api_data_science_app.v1.analysis.permissions import IsOwnerOrReadOnly
-from api_data_science_app.v1.analysis.serializers import AnalysisSerializer
 from django.core.files import File
+from django.http import Http404, HttpResponse
 from rest_framework import viewsets, status
-from rest_framework.authentication import BasicAuthentication, SessionAuthentication, TokenAuthentication
-
 from rest_framework.decorators import action
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from api_data_science_app.v1.analysis.permissions import IsOwnerOrReadOnly
+from api_data_science_app.v1.analysis.serializers import AnalysisSerializer
+from data_science_app.models import Analysis
 from ds_class.ds_execute import WebDataScienceExecute
 
 
 class AnalysisViewSet(viewsets.ModelViewSet):
-    #authentication_classes = (TokenAuthentication)
-    authentication_classes = (SessionAuthentication, BasicAuthentication)
     queryset = Analysis.objects.all()
     serializer_class = AnalysisSerializer
     permission_classes = (IsAuthenticated, IsOwnerOrReadOnly,)
 
-    @action(detail=True)
+    @action(methods=['post'], detail=True)
     def execute(self, request, *args, **kwargs):
         analysis = self.get_object()
         if request.user == analysis.user:
@@ -48,7 +43,7 @@ class AnalysisViewSet(viewsets.ModelViewSet):
                 raise Http404
         raise PermissionDenied
 
-    @action(detail=True)
+    @action(methods=['post'], detail=True)
     def download(self, request, *args, **kwargs):
         analysis = self.get_object()
         if request.user == analysis.user:
@@ -61,5 +56,3 @@ class AnalysisViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
-
-
