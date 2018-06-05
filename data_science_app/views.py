@@ -11,7 +11,7 @@ from data_science_app.forms import UserFormEdit
 from data_science_app.models import Analysis
 from ds_class.ds_execute import WebDataScienceExecute
 
-PAGINATION_PAGES = 2
+PAGINATION_PAGES = 5
 
 
 class SignUp(generic.CreateView):
