@@ -1,5 +1,4 @@
 from django.urls import path, include
-from rest_framework.authtoken import views as rest_views
 
 urlpatterns = [
     path("auth/", include("api_data_science_app.v1.auth.urls")),
