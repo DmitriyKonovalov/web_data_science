@@ -1,0 +1,27 @@
+Для корректной работы изменить:
+{username}	#admin
+{password}	#adminadmin
+{analysis_id}	
+{TOK}		
+{file_path}	# C:\data.csv
+
+Посмотреть токен
+http POST http://127.0.0.1:8000/api/v1/auth/api-token-auth/ username="admin" password="adminadmin"
+
+Показать все анализы пользователя
+http http://127.0.0.1:8000/api/v1/analyses/ Authorization:"Token {TOK}"
+
+Показать один анализ пользователя
+http http://127.0.0.1:8000/api/v1/analyses/1/ Authorization:"Token {TOK}"
+
+Создать анализ
+http POST http://localhost:8000/api/v1/analyses/ name="Analysis" ws="WS_1" wd="WD_1" wd_start=100 wd_stop=200 wd_step=10 ws_start=5 ws_stop=15 Authorization:"Token {TOK}"
+
+Загрузить файл с анализом
+http POST http://localhost:8000/api/v1/analyses/{analysis_id}/load_file_data/ file_path="C:\data.csv" Authorization:"Token {TOK}"
+
+Выполнить анализ
+http POST http://localhost:8000/api/v1/analyses/{analysis_id}/execute/ Authorization:"Token {TOK}"
+
+Скачать анализ
+http POST http://localhost:8000/api/v1/analyses/{analysis_id}/download/ Authorization:"Token {TOK}"

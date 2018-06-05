@@ -4,3 +4,4 @@ __pycache__
 media
 db.sqlite3
 log.txt
+migrations
