@@ -1,14 +1,16 @@
 web_data_science
 Порядок установки: 
-git clone https://github.com/DmitriyKonovalov/web_data_science;
-python -m venv env;
-call env\Scripts\activate;
-pip install -r requirements.txt;
-python manage.py makemigrations;
-python manage.py migrate;
-python manage.py createsuperuser 
+1) git clone https://github.com/DmitriyKonovalov/web_data_science;
+2) python -m venv env;
+3) call env\Scripts\activate;
+4) pip install -r requirements.txt;
+5) python manage.py makemigrations;
+6) python manage.py migrate;
+7) python manage.py createsuperuser 
 ... Указываем <username, password, email>;
-python manage.py runserver
+8) python manage.py runserver
+
+Note: шаги 2-6 можно запустить в автоматическом режиме (help_files\easy_install.bat)
 
 Сервер запущен!
 
