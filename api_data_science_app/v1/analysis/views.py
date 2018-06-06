@@ -41,12 +41,12 @@ class AnalysisViewSet(viewsets.ModelViewSet):
                 file_data = File(open(file_name, 'r'))
                 analysis.file_data.save(f'{analysis.name}.csv', file_data, save=True)
                 file_data.close()
-                return Response({}, status=status.HTTP_200_OK)
+                return Response({}, status=status.HTTP_201_CREATED)
             except:
                 raise Http404
         raise PermissionDenied
 
-    @action(methods=['post'], detail=True)
+    @action(detail=True)
     def download(self, request, *args, **kwargs):
         analysis = self.get_object()
         if request.user == analysis.user:

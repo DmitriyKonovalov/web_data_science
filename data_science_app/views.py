@@ -62,12 +62,8 @@ class Details(generic.DetailView):
     model = Analysis
 
     def get_object(self, queryset=None):
-        obj = get_object_or_404(Analysis, pk=self.kwargs['pk'])
+        obj = get_object_or_404(Analysis, pk=self.kwargs['pk'], user=self.request.user)
         return obj
-
-    def get_queryset(self):
-        queryset = super(Details, self).get_queryset()
-        return queryset.filter(user=self.request.user)
 
 
 class NewAnalysis(generic.CreateView):
@@ -89,12 +85,8 @@ class EditAnalysis(generic.UpdateView):
     success_url = reverse_lazy('desktop')
 
     def get_object(self, queryset=None):
-        obj = get_object_or_404(Analysis, pk=self.kwargs['pk'])
+        obj = get_object_or_404(Analysis, pk=self.kwargs['pk'], user=self.request.user)
         return obj
-
-    def get_queryset(self):
-        queryset = super(EditAnalysis, self).get_queryset()
-        return queryset.filter(user=self.request.user)
 
 
 class DeleteAnalysis(generic.DeleteView):
@@ -103,12 +95,8 @@ class DeleteAnalysis(generic.DeleteView):
     success_url = reverse_lazy('desktop')
 
     def get_object(self, queryset=None):
-        obj = get_object_or_404(Analysis, pk=self.kwargs['pk'])
+        obj = get_object_or_404(Analysis, pk=self.kwargs['pk'], user=self.request.user)
         return obj
-
-    def get_queryset(self):
-        queryset = super(DeleteAnalysis, self).get_queryset()
-        return queryset.filter(user=self.request.user)
 
 
 class AnalysisExecute(generic.RedirectView):
